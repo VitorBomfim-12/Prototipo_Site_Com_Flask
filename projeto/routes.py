@@ -87,6 +87,11 @@ def suporte():
            )
          database.session.add(chamado)
          database.session.commit()
+         
+         msg = Message(subject=f"Chamado de suporte:{n_chamado}",sender = os.getenv('DEL_EMAIL'), recipients= [os.getenv('REC_MAIL')])
+         msg.body = f''' O(a) cliente {current_user.clientname} requisitou um atendimento:\n\n Serial Number: {form_chamado.serial_number.data}  \n\n Descrição do chamado:\n {form_chamado.descricao.data} 
+         \n\n Email de retorno: {current_user.email} \n Telefone de contato: {current_user.telefone} \n Data do chamado: {data}, Hora do chamado: {hora_atual}'''
+         mail.send(msg)
          return redirect(url_for("suporte"))
     return render_template("suporte.html", form = form_chamado)
 
@@ -96,8 +101,4 @@ def logout():
     return redirect(url_for("homepage"))
 
 
-    #     msg = Message(subject=f"Chamado de suporte:{n_chamado}",sender = os.getenv('DEL_EMAIL'), recipients= [os.getenv('REC_MAIL')])
-    #     msg.body = f''' O(a) cliente {name} requisitou um atendimento:\n\n Serial Number: {serial}  \n\n Descrição do chamado:\n {mensagem} 
-    #     \n\n Email de retorno: {email} \n Telefone de contato: {numero_telefone} \n Data do chamado: {data_chamado}, Hora do chamado: {hora_chamado}'''
-    #     mail.send(msg)
-    #     return redirect(url_for("suporte"))
+  
