@@ -6,7 +6,7 @@ from flask_bcrypt import Bcrypt
 
 app=Flask(__name__)
 
-app.secret_key ="teste1"
+app.secret_key ="teste__#sahlinse&#$@crdone"
 #criação do banco de dados
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///chamados.db" 
 
@@ -20,6 +20,7 @@ database = SQLAlchemy(app)
 #inicialização do bcrypt e do login manager no app(site)
 
 bcrypt = Bcrypt(app)
+
 login_manager =LoginManager(app)
 
 login_manager.login_view="homepage"

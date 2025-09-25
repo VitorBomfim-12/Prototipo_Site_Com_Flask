@@ -24,9 +24,13 @@
 
 <body>
     <div class = "input-table">
+        
         <form method="POST" autocomplete="off">
         {{form.csrf_token}}
-  
+         <div>
+       <div style="color: white; padding-left:20px ;">
+        <h4>Login</h4>
+       </div>
         <div class ="input-group">
         {{form.email.label()}}
         {{form.email()}}
@@ -39,6 +43,10 @@
 
         <div class="input-group">
         {{form.botao_confirmacao()}}
+        </div>
+        <div>
+        <h6></h6>
+        <a href="{{url_for('criarconta')}}" style="text-decoration: none; color: white;"> <h6>Não tem uma conta? clique aqui</h6></a>
         </div>
 
         </form>

@@ -30,7 +30,6 @@ class FormCriarConta(FlaskForm):
         usuario= Clientes.query.filter_by(email=email.data).first()
         if usuario: return ValidationError("Email já cadastrado, faça login")
     
-
     def validate_cpf(self,CPF):
         usuario=Clientes.query.filter_by(CPF=CPF.data).first()
         if usuario: return ValidationError("CPF já cadastrado, faça login")
