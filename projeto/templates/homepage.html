@@ -1,0 +1,57 @@
+{%extends "base.html"%}
+
+{%block title%} Homepage {%endblock%}
+
+{%block header%}
+
+<header class="header" style=" background-image: url(../static/imagens/imagens/avulsos/fundo_equipamento.avif)">
+        <figure>
+        </figure>
+        <h1>Login</h1>
+</header>
+
+{%endblock%}
+
+{%block nav%}
+<nav class="navbar">
+     <ul>
+      <li><a href="">Equipamentos</a></li>
+      <li><a href="">Financiamentos</a></li>
+      <li><a href="">Suporte</a></li>
+     </ul>
+</nav>
+
+
+<body>
+    <div class = "input-table">
+        <form method="POST" autocomplete="off">
+        {{form.csrf_token}}
+  
+        <div class ="input-group">
+        {{form.email.label()}}
+        {{form.email()}}
+        </div>
+   
+        <div class ="input-group">
+        {{form.senha.label()}}
+        {{form.senha()}}
+        </div>
+
+        <div class="input-group">
+        {{form.botao_confirmacao()}}
+        </div>
+
+        </form>
+</div>
+
+        
+        {% with messages = get_flashed_messages() %}
+           {% if messages %}
+             {% for message in messages %}
+               <h3>{{message}}</h3> 
+             {% endfor %}
+           {% endif %}
+        {% endwith %}
+        
+</body>
+{%endblock%}

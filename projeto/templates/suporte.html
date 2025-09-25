@@ -1,0 +1,154 @@
+{%extends "base.html"%}
+
+{%block title%} Suporte {% endblock%}
+
+{%block header%} 
+<header class="header">
+        <figure>
+        <img src="../static/imagens/imagens/avulsos/toppng.com-john-deere-logo-3246x720.png" >
+        </figure>
+        <h1>Suporte ao cliente</h1>
+        
+</header>
+{%endblock%}
+
+{%block nav%}
+<nav class="navbar">
+     <ul>
+      <li><a href="">Home</a></li>
+      <li><a href="">Peças</a></li>
+      <li><a href="">Unimil</a></li>
+      <li><a href="">Contato</a></li>
+      <li>  <form action="/logout"><button type="submit"><h1>Logout</h1></button></form></li>
+     </ul>
+   
+      
+    </nav>
+{%endblock%}
+
+{%block main%}
+
+    <main>
+
+      <section class="cabecalho" >
+    
+        <div  class="cabecalho">
+          <h1 >Conheça a Unimil by John Deere</h1>
+        </div>
+        
+        <figure>
+          <img src="../static/imagens/imagens/avulsos/unimil-hero-1366x347.avif" alt="">
+        </figure>
+        <p style="font-size: 25px; font-family: Arial, Helvetica, sans-serif;">  A Unimil By John Deere oferece soluções para manter sua produtividade através de funcionalidades inteligentes geridas por IA e técnicos especializados.</p>
+      </section>
+
+      <div class ="cabecalho">
+           <h1>
+         Peças e serviços
+           </h1>
+        </div>   
+       
+      <section  class="cabecalho">
+      
+          <figure>
+
+          <img src="../static/imagens/imagens/avulsos/Fundo_manutenção.avif" alt="">
+
+          </figure>
+
+        
+
+
+      </section>
+ 
+      <div class="cabecalho">
+       <h1>Itens</h1>
+      </div>
+       <section class ="tabelaimg">
+        
+        <figure>
+          <img src="../static/imagens/imagens/Pecas_servicos/ps-parts-maintenance-batteries-hero-carousel-battery_295x167.jpg" alt="">
+        
+          <h1>Aditivos</h1>
+        
+        </figure>
+        <figure>
+          <img src="../static/imagens/imagens/Pecas_servicos/bateria.avif" alt="">
+          
+          <h1>Baterias</h1>
+        
+          
+        </figure>
+        <figure>
+          <img src="../static/imagens/imagens/Pecas_servicos/ps-parts-maintenance-oils_grease_coolants-hero-carousel-oil_295x167.avif" alt="">
+          
+          <h1>Graxas</h1>
+        
+        </figure>
+        <figure>
+          <img src="../static/imagens/imagens/Pecas_servicos/ps-parts-maintenance-hero-carousel-r4b008205_rrd.webp" alt="">
+          
+          <h1>Ferramentas</h1>
+        
+        </figure>
+        <figure>
+          <img src="../static/imagens/imagens/Pecas_servicos/filtro-thumb.avif" alt="">
+          
+          <h1>Filtros</h1>
+        
+        </figure>
+        <figure>
+          <img src="../static/imagens/imagens/Pecas_servicos/linha-de-cuidados-exclusivos.avif" alt="">
+          
+          <h1>Exclusivos</h1>
+        
+        </figure>
+       </section>
+      
+       <div class =  "cabecalho">
+        <h1>Contato com o suporte</h1>
+
+       </div>
+
+       <section>
+        <div class = "input-table">
+        <form method="POST" autocomplete="off">
+        {{form.csrf_token}}
+    
+        <div class ="input-group">
+        {{form.descricao.label()}}
+        {{form.descricao()}}
+        </div>
+   
+        <div class ="input-group">
+        {{form.serial_number.label()}}
+        {{form.serial_number()}}
+        </div>
+
+
+        <div class="input-group">
+        {{form.botao_confirmacao()}}
+        </div>
+
+       
+        </form>
+        </div>
+
+
+
+
+
+
+
+
+
+
+
+       </section>
+
+
+       <footer>Teste</footer>
+    </main>
+
+
+{%endblock%}
