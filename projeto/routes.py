@@ -1,4 +1,4 @@
-from flask import Flask,render_template,url_for, request, redirect,flash
+from flask import Flask,render_template,url_for,redirect,flash
 from flask_mail import Mail,Message
 from projeto import app,database,bcrypt
 import os
@@ -41,6 +41,19 @@ def suporte_email(n_cham,nome,serial,descricao,data,hora,email, telefone):
     msg.body = f''' O(a) cliente {nome} requisitou um antendimento \n Serial number: {serial}
     \n Descrição: {descricao}\n Data e hora {data} , {hora} \n\n Email de retorno: {email} \n Telefone :{telefone}'''
     mail.send(msg)
+
+def data_():
+    data = date.today()
+    data="{}/{}/{}".format(data.day,data.month,data.year)
+    data=str(data)
+    return data
+        
+def hora_():
+     hora_atual = datetime.now().time()
+     hora_atual=hora_atual.strftime("%H:%M")
+     hora_atual=str(hora_atual)
+     return hora_atual
+        
 
                 
 
@@ -87,15 +100,11 @@ def criarconta():
 def suporte():
     form_chamado = FormContato()
     if form_chamado.validate_on_submit():
+         
          n_chamado = gera_n_chamado()
+         data=data_()
+         hora_atual=hora_()
 
-         data = date.today()
-         data="{}/{}/{}".format(data.day,data.month,data.year)
-         data=str(data)
-
-         hora_atual = datetime.now().time()
-         hora_atual=hora_atual.strftime("%H:%M")
-         hora_atual=str(hora_atual)
 
          chamado = Chamado(
           numerochamado=n_chamado,
@@ -103,15 +112,11 @@ def suporte():
           hora = hora_atual,
           descricao= form_chamado.descricao.data,
           serialnumber= form_chamado.serial_number.data,
-          cliente_id=current_user.id
-           )
+          cliente_id=current_user.id )
+         
          database.session.add(chamado)
          database.session.commit()
-        
-        #  msg = Message(subject=f"Chamado de suporte:{n_chamado}",sender = os.getenv('DEL_EMAIL'), recipients= [os.getenv('REC_MAIL')])
-        #  msg.body = f''' O(a) cliente {current_user.clientname} requisitou um atendimento:\n\n Serial Number: {form_chamado.serial_number.data}  \n\n Descrição do chamado:\n {form_chamado.descricao.data} 
-        #  \n\n Email de retorno: {current_user.email} \n Telefone de contato: {current_user.telefone} \n Data do chamado: {data}, Hora do chamado: {hora_atual}'''
-        #  mail.send(msg)
+   
          suporte_email(n_chamado,current_user.clientname,
                        form_chamado.serial_number.data,
                        form_chamado.descricao.data,data,
