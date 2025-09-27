@@ -5,7 +5,6 @@ import os
 import dotenv
 import random
 from datetime import date,datetime
-from projeto.models import Chamado
 from flask_login import login_required, login_user,logout_user,current_user
 from projeto.forms import FormCriarConta, FormLogin, FormContato
 from projeto.models import Clientes, Chamado 
@@ -24,6 +23,26 @@ app.config['MAIL_USE_SSL'] = False
 mail = Mail(app)
 
 
+
+def gera_n_chamado():
+     while True:
+         n_chamado=""
+         for i in range (10):
+             n_chamado+=str(random.randint(0,9))
+
+         teste_chamado_exis= Chamado.query.filter_by(numerochamado=n_chamado).first()
+         if not teste_chamado_exis:
+             return n_chamado
+         
+
+
+def suporte_email(n_cham,nome,serial,descricao,data,hora,email, telefone):
+    msg = Message(subject=f"Chamado de suporte Nº{n_cham}", sender = os.getenv('DEL_EMAIL'), recipients=[os.getenv('REC_MAIL')])
+    msg.body = f''' O(a) cliente {nome} requisitou um antendimento \n Serial number: {serial}
+    \n Descrição: {descricao}\n Data e hora {data} , {hora} \n\n Email de retorno: {email} \n Telefone :{telefone}'''
+    mail.send(msg)
+
+                
 
 @app.route("/", methods = ["GET","POST"])
 def homepage():
@@ -68,13 +87,14 @@ def criarconta():
 def suporte():
     form_chamado = FormContato()
     if form_chamado.validate_on_submit():
-         n_chamado=""
-         for i in range (10):
-          n_chamado+=str(random.randint(0,9))
+         n_chamado = gera_n_chamado()
+
          data = date.today()
          data="{}/{}/{}".format(data.day,data.month,data.year)
          data=str(data)
+
          hora_atual = datetime.now().time()
+         hora_atual=hora_atual.strftime("%H:%M")
          hora_atual=str(hora_atual)
 
          chamado = Chamado(
@@ -88,10 +108,16 @@ def suporte():
          database.session.add(chamado)
          database.session.commit()
         
-         msg = Message(subject=f"Chamado de suporte:{n_chamado}",sender = os.getenv('DEL_EMAIL'), recipients= [os.getenv('REC_MAIL')])
-         msg.body = f''' O(a) cliente {current_user.clientname} requisitou um atendimento:\n\n Serial Number: {form_chamado.serial_number.data}  \n\n Descrição do chamado:\n {form_chamado.descricao.data} 
-         \n\n Email de retorno: {current_user.email} \n Telefone de contato: {current_user.telefone} \n Data do chamado: {data}, Hora do chamado: {hora_atual}'''
-         mail.send(msg)
+        #  msg = Message(subject=f"Chamado de suporte:{n_chamado}",sender = os.getenv('DEL_EMAIL'), recipients= [os.getenv('REC_MAIL')])
+        #  msg.body = f''' O(a) cliente {current_user.clientname} requisitou um atendimento:\n\n Serial Number: {form_chamado.serial_number.data}  \n\n Descrição do chamado:\n {form_chamado.descricao.data} 
+        #  \n\n Email de retorno: {current_user.email} \n Telefone de contato: {current_user.telefone} \n Data do chamado: {data}, Hora do chamado: {hora_atual}'''
+        #  mail.send(msg)
+         suporte_email(n_chamado,current_user.clientname,
+                       form_chamado.serial_number.data,
+                       form_chamado.descricao.data,data,
+                       hora_atual,current_user.email,
+                       current_user.telefone
+                       )
          return redirect(url_for("suporte"))
     return render_template("suporte.html", form = form_chamado)
 
@@ -100,5 +126,6 @@ def logout():
     logout_user()
     return redirect(url_for("homepage"))
 
+    
 
   

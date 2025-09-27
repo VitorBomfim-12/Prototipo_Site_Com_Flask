@@ -17,7 +17,7 @@ class Clientes(database.Model,UserMixin):
     clientname= database.Column(database.String, nullable=False)
     telefone= database.Column(database.String,unique=True,nullable=False) 
     chamados= database.relationship("Chamado", backref="cliente", lazy=True) 
-    
+
 class Chamado(database.Model):
     
     id = database.Column(database.Integer, primary_key=True)
