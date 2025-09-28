@@ -1,12 +1,12 @@
-from flask import Flask,render_template,url_for,redirect,flash
+from flask import Flask,render_template,url_for,redirect,flash,session
 from flask_mail import Mail,Message
-from projeto import app,database,bcrypt
+from projeto import app,database,bcrypt,Session
 import os
 import dotenv
 import random
 from datetime import date,datetime
 from flask_login import login_required, login_user,logout_user,current_user
-from projeto.forms import FormCriarConta, FormLogin, FormContato
+from projeto.forms import FormCriarConta, FormLogin, FormContato, Form_Verifica
 from projeto.models import Clientes, Chamado 
 from sqlalchemy.exc import IntegrityError
 from dotenv import load_dotenv
@@ -24,17 +24,22 @@ mail = Mail(app)
 
 
 
-def gera_n_chamado():
+def gera_n(lim):
      while True:
          n_chamado=""
-         for i in range (10):
+         for i in range (lim):
              n_chamado+=str(random.randint(0,9))
 
          teste_chamado_exis= Chamado.query.filter_by(numerochamado=n_chamado).first()
          if not teste_chamado_exis:
-             return n_chamado
+             return str(n_chamado)
          
-
+def email_verifica(n_cham,email):
+    
+    msg_ve = Message(subject=f" Código de verificação ", sender = os.getenv('DEL_EMAIL'), recipients=[email])
+    msg_ve.body = f''' Seu código de verificação é {str(n_cham)}\n\n @Jhon Deere, todos os direitos reservados'''
+    mail.send(msg_ve)
+   
 
 def suporte_email(n_cham,nome,serial,descricao,data,hora,email, telefone):
     msg = Message(subject=f"Chamado de suporte Nº{n_cham}", sender = os.getenv('DEL_EMAIL'), recipients=[os.getenv('REC_MAIL')])
@@ -53,22 +58,41 @@ def hora_():
      hora_atual=hora_atual.strftime("%H:%M")
      hora_atual=str(hora_atual)
      return hora_atual
-        
-
-                
-
+  
 @app.route("/", methods = ["GET","POST"])
 def homepage():
     formlogin = FormLogin()
     if formlogin.validate_on_submit():
         usuario = Clientes.query.filter_by(email=formlogin.email.data).first()
         if usuario and  bcrypt.check_password_hash(usuario.senha, formlogin.senha.data):
-           login_user(usuario)
-           return redirect(url_for("suporte")) 
+            cod=gera_n(6)
+            email_verifica(cod,formlogin.email.data)
+            
+            session["codigo"] = cod
+            session["user"] = usuario
+            return redirect (url_for ("verificacao"))
            
     return render_template ("homepage.html", form=formlogin)
 
 
+@app.route("/verifica", methods =["GET","POST"])
+def verificacao():
+    formverifica=Form_Verifica()
+    codigo = session.get("codigo")
+
+    if formverifica.validate_on_submit():
+     
+     if formverifica.codigo_verificacao.data==codigo:
+        user = session.get("user")
+        login_user(user)
+        return redirect (url_for("suporte"))
+     else: 
+        flash("Código incorreto!")
+        return redirect(url_for("homepage"))
+
+    return render_template("verifica.html", form = formverifica)
+   
+      
 @app.route("/criarconta", methods =["GET","POST"])
 def criarconta():
     formcriarconta = FormCriarConta()
@@ -101,7 +125,7 @@ def suporte():
     form_chamado = FormContato()
     if form_chamado.validate_on_submit():
          
-         n_chamado = gera_n_chamado()
+         n_chamado = gera_n(10)
          data=data_()
          hora_atual=hora_()
 
@@ -128,6 +152,7 @@ def suporte():
 
 @app.route("/logout")
 def logout():
+    session.clear()
     logout_user()
     return redirect(url_for("homepage"))
 

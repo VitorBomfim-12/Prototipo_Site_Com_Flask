@@ -40,4 +40,7 @@ class FormContato(FlaskForm):
     serial_number=StringField("Serial Number do produto:",validators=[DataRequired()])
     botao_confirmacao=SubmitField("Enviar chamado")
     
+class Form_Verifica(FlaskForm):
+    codigo_verificacao= StringField("Código",validators=[DataRequired()])
+    botao_confirmacao = SubmitField("Login")
 
