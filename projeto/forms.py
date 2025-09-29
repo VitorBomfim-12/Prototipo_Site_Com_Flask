@@ -30,7 +30,6 @@ class FormCriarConta(FlaskForm):
         usuario= Clientes.query.filter_by(email=email.data).first()
         if usuario: return ValidationError("Email já cadastrado, faça login")
     
-
     def validate_cpf(self,CPF):
         usuario=Clientes.query.filter_by(CPF=CPF.data).first()
         if usuario: return ValidationError("CPF já cadastrado, faça login")
@@ -41,4 +40,7 @@ class FormContato(FlaskForm):
     serial_number=StringField("Serial Number do produto:",validators=[DataRequired()])
     botao_confirmacao=SubmitField("Enviar chamado")
     
+class Form_Verifica(FlaskForm):
+    codigo_verificacao= StringField("Código",validators=[DataRequired()])
+    botao_confirmacao = SubmitField("Login")
 

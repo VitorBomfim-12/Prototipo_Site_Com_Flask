@@ -1,59 +1,42 @@
 {%extends "base.html"%}
 
-{%block title%} Homepage {%endblock%}
+{%block title%} Verificação {%endblock%}
 
 {%block header%}
 
 <header class="header" style=" background-image: url(../static/imagens/imagens/avulsos/fundo_equipamento.avif)">
         <figure>
         </figure>
-        <h1>Login</h1>
+        <h1>Verificação</h1>
 </header>
-
 {%endblock%}
-
 {%block nav%}
-<nav class="navbar">
-     <ul>
-      <li></li>
-      <li></li>
-      <li></li>
-     </ul>
-</nav>
+
+<nav class="navbar"></nav>
 {%endblock%}
 
-{%block main%}
-<body>
+{%block main%} 
+
+ <body>
     <div class = "input-table">
         
         <form method="POST" autocomplete="off">
         {{form.csrf_token}}
          <div>
-       <div style="color: white; padding-left:20px ;">
-        <h4>Login</h4>
+       <div style="color: white;" >
+        <h4>Código de Verificação</h4>
+
        </div>
         <div class ="input-group">
-        {{form.email.label()}}
-        {{form.email()}}
+        {{form.codigo_verificacao.label()}}
+        {{form.codigo_verificacao()}}
         </div>
-   
-        <div class ="input-group">
-        {{form.senha.label()}}
-        {{form.senha()}}
-        </div>
-
-        <div class="input-group">
+          <div class="input-group">
         {{form.botao_confirmacao()}}
-        </div>
-        <div>
-        <h6></h6>
-        <a href="{{url_for('criarconta')}}" style="text-decoration: none; color: white;"> <h6>Não tem uma conta? clique aqui</h6></a>
         </div>
 
         </form>
-</div>
-
-        
+            
         {% with messages = get_flashed_messages() %}
            {% if messages %}
              {% for message in messages %}
@@ -61,6 +44,19 @@
              {% endfor %}
            {% endif %}
         {% endwith %}
-        
-</body>
+</div>
 {%endblock%}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

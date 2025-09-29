@@ -164,7 +164,8 @@ height: auto;
 }
 .input-table{
 display: flex;
-flex-direction: row;
+justify-content: center;
+margin-top: 20px;
 background-size: cover;       /* faz a imagem cobrir toda a tela */
 background-repeat: no-repeat; /* evita repetição */
 background-position: top center;  /* centraliza a imagem */
@@ -196,7 +197,6 @@ max-width: 50%;
 margin:10px auto;
 padding: 10px;
 text-decoration: none;
-
-
 }
+
 
