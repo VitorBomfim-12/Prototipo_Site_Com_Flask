@@ -67,7 +67,6 @@ def homepage():
         if usuario and  bcrypt.check_password_hash(usuario.senha, formlogin.senha.data):
             cod=gera_n(6)
             email_verifica(cod,formlogin.email.data)
-            
             session["codigo"] = cod
             session["user"] = usuario
             return redirect (url_for ("verificacao"))
@@ -88,6 +87,7 @@ def verificacao():
         return redirect (url_for("suporte"))
      else: 
         flash("Código incorreto!")
+        session.clear()
         return redirect(url_for("homepage"))
 
     return render_template("verifica.html", form = formverifica)
@@ -95,6 +95,7 @@ def verificacao():
       
 @app.route("/criarconta", methods =["GET","POST"])
 def criarconta():
+    
     formcriarconta = FormCriarConta()
     if formcriarconta.validate_on_submit():
         try:
@@ -108,7 +109,6 @@ def criarconta():
          database.session.add(cliente)
          database.session.commit()
          login_user(cliente,remember=True)
-         
          
          return redirect(url_for("suporte"))
         except IntegrityError:
