@@ -69,28 +69,40 @@ def homepage():
             session["user"] = usuario
             session["hora_lancamento"] = datetime.now()
             return redirect (url_for ("verificacao"))
+        else:
+            flash("Email incorreto ou senha incorretos!")
+            
            
     return render_template ("homepage.html", form=formlogin)
 
 
 @app.route("/verifica", methods =["GET","POST"])
 def verificacao():
+
     formverifica=Form_Verifica()
     codigo = session.get("codigo")
     hora_do_envio=session.get("hora_lancamento")
+
     hora_atual=datetime.now()
     diferença = hora_atual-hora_do_envio
     limite = timedelta(minutes=5)
+    
     if formverifica.validate_on_submit():
      
      if formverifica.codigo_verificacao.data==codigo and diferença < limite:
         user = session.get("user")
         login_user(user)
         return redirect (url_for("suporte"))
-     else: 
-        flash("Código incorreto! ou código expirado")
+     elif diferença > limite: 
         session.clear()
+        flash("Código expirado")
         return redirect(url_for("homepage"))
+     elif formverifica.codigo_verificacao.data!=codigo:
+        session.clear()
+        flash("Código incorreto!")
+        return redirect(url_for("homepage"))
+          
+     
 
     return render_template("verifica.html", form = formverifica)
    
@@ -100,6 +112,9 @@ def criarconta():
     
     formcriarconta = FormCriarConta()
     if formcriarconta.validate_on_submit():
+        if formcriarconta.confirmacao_senha.data != formcriarconta.senha.data:
+             flash("As senhas devem ser iguais!")
+             return redirect(url_for("criarconta"))
         try:
          senha = bcrypt.generate_password_hash(formcriarconta.senha.data)
          cliente=Clientes(clientname = formcriarconta.username.data,
@@ -107,7 +122,8 @@ def criarconta():
                          senha = senha,
                          CPF = formcriarconta.CPF.data,
                          telefone = formcriarconta.telefone.data)
-      
+         
+
          database.session.add(cliente)
          database.session.commit()
          login_user(cliente,remember=True)
@@ -150,6 +166,10 @@ def suporte():
                        )
          return redirect(url_for("suporte"))
     return render_template("suporte.html", form = form_chamado)
+
+@app.route("/suporte/chamados-existentes")
+def chamados():
+    pass
 
 @app.route("/logout")
 def logout():

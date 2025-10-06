@@ -24,6 +24,17 @@
 
 {%block main%}
 <body>
+  
+        <div>
+        {% with messages = get_flashed_messages() %}
+           {% if messages %}
+             {% for message in messages %}
+               <div class = "alert">{{message}} </div>
+             {% endfor %}
+           {% endif %}
+        {% endwith %}
+        </div>
+
     <div class = "input-table">
         
         <form method="POST" autocomplete="off">
@@ -45,22 +56,13 @@
         <div class="input-group">
         {{form.botao_confirmacao()}}
         </div>
-        <div>
-        <h6></h6>
-        <a href="{{url_for('criarconta')}}" style="text-decoration: none; color: white;"> <h6>Não tem uma conta? clique aqui</h6></a>
+
+        <div> 
+        <a href="{{url_for('criarconta')}}" style="text-decoration: none; color: white;"> <h3>Não tem uma conta? clique aqui</h3></a>
         </div>
 
         </form>
 </div>
 
-        
-        {% with messages = get_flashed_messages() %}
-           {% if messages %}
-             {% for message in messages %}
-               <h3>{{message}}</h3> 
-             {% endfor %}
-           {% endif %}
-        {% endwith %}
-        
 </body>
 {%endblock%}

@@ -41,6 +41,6 @@ class FormContato(FlaskForm):
     botao_confirmacao=SubmitField("Enviar chamado")
     
 class Form_Verifica(FlaskForm):
-    codigo_verificacao= StringField("Código",validators=[DataRequired()])
+    codigo_verificacao= StringField("Código",validators=[DataRequired(),Length(max=6)])
     botao_confirmacao = SubmitField("Login")
 

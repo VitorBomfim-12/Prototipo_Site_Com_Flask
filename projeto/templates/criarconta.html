@@ -17,7 +17,7 @@
 
 <nav class="navbar">
      <ul>
-      <li><a href="homepage.html">Login</a></li>
+      <li></li>
       <li></li>
       <li></li>
       <li></li>
@@ -29,6 +29,17 @@
 {%block main%}
 
 <body>
+
+         <div>
+          {% with messages = get_flashed_messages() %}
+           {% if messages %}
+             {% for message in messages %}
+               <div class = "alert">{{message}} </div>
+             {% endfor %}
+           {% endif %}
+        {% endwith %}
+        </div>
+
     <div class = "input-table">
         <form method="POST" autocomplete="off">
         {{form.csrf_token}}
@@ -68,18 +79,16 @@
         {{form.botao_confirmacao()}}
         </div>
 
-       
+        
+        <div> 
+        <a href="{{url_for('criarconta')}}" style="text-decoration: none; color: white;"> <h6>Já tem uma conta? clique aqui e faça login</h6></a>
+        </div>
+
         </form>
 </div>
 
-        
-        {% with messages = get_flashed_messages() %}
-           {% if messages %}
-             {% for message in messages %}
-               <h3>{{message}}</h3> 
-             {% endfor %}
-           {% endif %}
-        {% endwith %}
+       
+       
         
 </body>
 {%endblock%}
