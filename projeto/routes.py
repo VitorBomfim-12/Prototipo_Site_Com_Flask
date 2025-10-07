@@ -70,7 +70,7 @@ def homepage():
             session["hora_lancamento"] = datetime.now()
             return redirect (url_for ("verificacao"))
         else:
-            flash("Email incorreto ou senha incorretos!")
+            flash("Email ou senha incorretos!")
             
            
     return render_template ("homepage.html", form=formlogin)
@@ -127,14 +127,13 @@ def criarconta():
          database.session.add(cliente)
          database.session.commit()
          login_user(cliente,remember=True)
-         
          return redirect(url_for("suporte"))
+        
         except IntegrityError:
             database.session.rollback()
             flash("Email, CPF, ou telefone já cadastrado! faça login ")
             return redirect(url_for("homepage"))
         
-    
     return render_template("criarconta.html", form = formcriarconta)
 
 @app.route("/suporte", methods=["GET","POST"])
