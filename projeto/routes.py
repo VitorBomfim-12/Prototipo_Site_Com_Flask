@@ -7,7 +7,7 @@ import random
 from datetime import date,datetime,timedelta
 from flask_login import login_required, login_user,logout_user,current_user
 from projeto.forms import FormCriarConta, FormLogin, FormContato, Form_Verifica
-from projeto.models import Clientes, Chamado 
+from projeto.models import Clientes, Chamado
 from sqlalchemy.exc import IntegrityError
 from dotenv import load_dotenv
 
@@ -152,7 +152,8 @@ def suporte():
           hora = hora_atual,
           descricao= form_chamado.descricao.data,
           serialnumber= form_chamado.serial_number.data,
-          cliente_id=current_user.id )
+          equipamento_id= form_chamado.equipamento.data
+          ,cliente_id=current_user.id )
          
          database.session.add(chamado)
          database.session.commit()

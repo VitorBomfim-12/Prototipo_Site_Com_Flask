@@ -18,6 +18,12 @@ class Clientes(database.Model,UserMixin):
     telefone= database.Column(database.String,unique=True,nullable=False) 
     chamados= database.relationship("Chamado", backref="cliente", lazy=True) 
 
+class Equipamento(database.Model):
+    id = database.Column(database.Integer, primary_key=True)
+    tipo = database.Column(database.String,nullable=False,unique=True)
+    chamados = database.relationship('Chamado', backref='equipamento', lazy=True)
+
+
 class Chamado(database.Model):
     
     id = database.Column(database.Integer, primary_key=True)
@@ -27,4 +33,5 @@ class Chamado(database.Model):
     descricao= database.Column(database.String, nullable=False)
     serialnumber= database.Column(database.String, nullable=False)
     cliente_id = database.Column(database.Integer, database.ForeignKey('clientes.id'),nullable=False)
-  
+    equipamento_id = database.Column(database.Integer,database.ForeignKey('equipamento.id'),nullable=False)
+    

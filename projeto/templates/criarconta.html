@@ -29,17 +29,6 @@
 {%block main%}
 
 <body>
-
-         <div>
-          {% with messages = get_flashed_messages() %}
-           {% if messages %}
-             {% for message in messages %}
-               <div class = "alert">{{message}} </div>
-             {% endfor %}
-           {% endif %}
-        {% endwith %}
-        </div>
-
     <div class = "input-table">
         <form method="POST" autocomplete="off">
         {{form.csrf_token}}
@@ -52,6 +41,13 @@
         <div class ="input-group">
         {{form.email.label()}}
         {{form.email()}}
+        {%if form.email.errors%}
+        <div class = "alert"> {%for erro in form.email.errors%}
+        <a href="{{url_for('homepage')}}"><span class = "alert">Email ja cadastrado, faça login</span></a>
+          {%endfor%}
+        </div>
+        {%endif%}
+       
         </div>
 
         <div class ="input-group">

@@ -19,8 +19,12 @@
       <li><a href="">Peças</a></li>
       <li><a href="">Unimil</a></li>
       <li><a href="">Contato</a></li>
-      <li>  <form action="/logout"><button type="submit"><h1>Logout</h1></button></form></li>
      </ul>
+    
+     <div> 
+      <form action="/logout"><button type="submit"><h1>Logout</h1></button></form>
+     </div>
+         
    
       
     </nav>
@@ -124,7 +128,10 @@
         {{form.serial_number.label()}}
         {{form.serial_number()}}
         </div>
-
+        <div class = "input-group">
+          {{form.equipamento.label()}}
+          {{form.equipamento()}}
+        </div>
 
         <div class="input-group">
         {{form.botao_confirmacao()}}
