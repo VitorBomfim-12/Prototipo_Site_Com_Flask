@@ -45,7 +45,7 @@ class FormContato(FlaskForm):
               ('4','Fertilizadores'),
               ('5','Geradores'),
               ('6','Pulverizadores'),
-              ('7','Empilhadeiras')
+              ('7','Empilhadeiras'),
               ('8','Retroescavadeira'),
               ('9','Equipamentos eletrônicos'),
               ('10','Forrageiras'),], validators=[DataRequired()])
