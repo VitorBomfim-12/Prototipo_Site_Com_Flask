@@ -4,10 +4,10 @@ from projeto import app,database,bcrypt,Session
 import os
 import dotenv
 import random
-from datetime import date,datetime
+from datetime import date,datetime,timedelta
 from flask_login import login_required, login_user,logout_user,current_user
 from projeto.forms import FormCriarConta, FormLogin, FormContato, Form_Verifica
-from projeto.models import Clientes, Chamado 
+from projeto.models import Clientes, Chamado
 from sqlalchemy.exc import IntegrityError
 from dotenv import load_dotenv
 
@@ -50,13 +50,11 @@ def suporte_email(n_cham,nome,serial,descricao,data,hora,email, telefone):
 def data_():
     data = date.today()
     data="{}/{}/{}".format(data.day,data.month,data.year)
-    data=str(data)
     return data
         
 def hora_():
      hora_atual = datetime.now().time()
      hora_atual=hora_atual.strftime("%H:%M")
-     hora_atual=str(hora_atual)
      return hora_atual
   
 @app.route("/", methods = ["GET","POST"])
@@ -69,26 +67,42 @@ def homepage():
             email_verifica(cod,formlogin.email.data)
             session["codigo"] = cod
             session["user"] = usuario
+            session["hora_lancamento"] = datetime.now()
             return redirect (url_for ("verificacao"))
+        else:
+            flash("Email ou senha incorretos!")
+            
            
     return render_template ("homepage.html", form=formlogin)
 
 
 @app.route("/verifica", methods =["GET","POST"])
 def verificacao():
+
     formverifica=Form_Verifica()
     codigo = session.get("codigo")
+    hora_do_envio=session.get("hora_lancamento")
 
+    hora_atual=datetime.now()
+    diferença = hora_atual-hora_do_envio
+    limite = timedelta(minutes=5)
+    
     if formverifica.validate_on_submit():
      
-     if formverifica.codigo_verificacao.data==codigo:
+     if formverifica.codigo_verificacao.data==codigo and diferença < limite:
         user = session.get("user")
         login_user(user)
         return redirect (url_for("suporte"))
-     else: 
-        flash("Código incorreto!")
+     elif diferença > limite: 
         session.clear()
+        flash("Código expirado")
         return redirect(url_for("homepage"))
+     elif formverifica.codigo_verificacao.data!=codigo:
+        session.clear()
+        flash("Código incorreto!")
+        return redirect(url_for("homepage"))
+          
+     
 
     return render_template("verifica.html", form = formverifica)
    
@@ -98,6 +112,9 @@ def criarconta():
     
     formcriarconta = FormCriarConta()
     if formcriarconta.validate_on_submit():
+        if formcriarconta.confirmacao_senha.data != formcriarconta.senha.data:
+             flash("As senhas devem ser iguais!")
+             return redirect(url_for("criarconta"))
         try:
          senha = bcrypt.generate_password_hash(formcriarconta.senha.data)
          cliente=Clientes(clientname = formcriarconta.username.data,
@@ -105,18 +122,18 @@ def criarconta():
                          senha = senha,
                          CPF = formcriarconta.CPF.data,
                          telefone = formcriarconta.telefone.data)
-      
+         
+
          database.session.add(cliente)
          database.session.commit()
          login_user(cliente,remember=True)
-         
          return redirect(url_for("suporte"))
+        
         except IntegrityError:
             database.session.rollback()
             flash("Email, CPF, ou telefone já cadastrado! faça login ")
             return redirect(url_for("homepage"))
         
-    
     return render_template("criarconta.html", form = formcriarconta)
 
 @app.route("/suporte", methods=["GET","POST"])
@@ -126,9 +143,8 @@ def suporte():
     if form_chamado.validate_on_submit():
          
          n_chamado = gera_n(10)
-         data=data_()
-         hora_atual=hora_()
-
+         data=str(data_())
+         hora_atual=str(hora_())
 
          chamado = Chamado(
           numerochamado=n_chamado,
@@ -136,7 +152,8 @@ def suporte():
           hora = hora_atual,
           descricao= form_chamado.descricao.data,
           serialnumber= form_chamado.serial_number.data,
-          cliente_id=current_user.id )
+          equipamento_id= form_chamado.equipamento.data
+          ,cliente_id=current_user.id )
          
          database.session.add(chamado)
          database.session.commit()
@@ -150,6 +167,10 @@ def suporte():
          return redirect(url_for("suporte"))
     return render_template("suporte.html", form = form_chamado)
 
+@app.route("/suporte/chamados-existentes")
+def chamados():
+    pass
+
 @app.route("/logout")
 def logout():
     session.clear()
@@ -158,4 +179,4 @@ def logout():
 
     
 
-  
+   

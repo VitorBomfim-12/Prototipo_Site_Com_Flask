@@ -1,2 +1,3 @@
 .env
 flask_session/
+instance

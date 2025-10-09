@@ -17,7 +17,7 @@
 
 <nav class="navbar">
      <ul>
-      <li><a href="homepage.html">Login</a></li>
+      <li></li>
       <li></li>
       <li></li>
       <li></li>
@@ -41,6 +41,13 @@
         <div class ="input-group">
         {{form.email.label()}}
         {{form.email()}}
+        {%if form.email.errors%}
+        <div class = "alert"> {%for erro in form.email.errors%}
+        <a href="{{url_for('homepage')}}"><span class = "alert">Email ja cadastrado, faça login</span></a>
+          {%endfor%}
+        </div>
+        {%endif%}
+       
         </div>
 
         <div class ="input-group">
@@ -68,18 +75,16 @@
         {{form.botao_confirmacao()}}
         </div>
 
-       
+        
+        <div> 
+        <a href="{{url_for('criarconta')}}" style="text-decoration: none; color: white;"> <h6>Já tem uma conta? clique aqui e faça login</h6></a>
+        </div>
+
         </form>
 </div>
 
-        
-        {% with messages = get_flashed_messages() %}
-           {% if messages %}
-             {% for message in messages %}
-               <h3>{{message}}</h3> 
-             {% endfor %}
-           {% endif %}
-        {% endwith %}
+       
+       
         
 </body>
 {%endblock%}
