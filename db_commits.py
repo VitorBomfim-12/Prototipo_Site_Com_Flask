@@ -5,7 +5,7 @@ from projeto.models import Equipamento
 lista_equipamentos= ('trator',
               'colheitadeira',
               'arado','semeadeiras',
-              'fertilizadores'
+              'fertilizadores',
               'geradores',
               'pulverizadores',
               'empilhadeiras',
