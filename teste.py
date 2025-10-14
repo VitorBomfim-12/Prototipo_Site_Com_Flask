@@ -1,7 +1,9 @@
-from datetime import date, datetime
-data = date.today()
-data="{}/{}/{}".format(data.day,data.month,data.year)
-hora_atual = datetime.now().time()
+from projeto import database,app
+from projeto.models import Equipamento,Chamado
 
-print(hora_atual)
-print(type(data))
+with app.app_context():
+    equipamentos_tupla = database.session.query(Chamado.equipamento_id).all()
+
+lista_defeitos = [equipamento_id for (equipamento_id,) in equipamentos_tupla]
+
+print(lista_defeitos)

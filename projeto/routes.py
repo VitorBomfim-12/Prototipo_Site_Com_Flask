@@ -42,7 +42,7 @@ def email_verifica(n_cham,email):
    
 
 def suporte_email(n_cham,nome,serial,descricao,data,hora,email, telefone):
-    msg = Message(subject=f"Chamado de suporte Nº{n_cham}", sender = os.getenv('DEL_EMAIL'), recipients=[os.getenv('REC_MAIL')])
+    msg = Message(subject=f"Chamado de suporte Nº{n_cham}", sender = os.getenv('DEL_EMAIL'), recipients=[os.getenv('REC_EMAIL')])
     msg.body = f''' O(a) cliente {nome} requisitou um antendimento \n Serial number: {serial}
     \n Descrição: {descricao}\n Data e hora {data} , {hora} \n\n Email de retorno: {email} \n Telefone :{telefone}'''
     mail.send(msg)

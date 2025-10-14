@@ -40,15 +40,19 @@ class FormContato(FlaskForm):
     serial_number=StringField("Serial Number do produto:",validators=[DataRequired()])
     
     equipamento = RadioField('Escolha o equipamento:',
-               choices=[('1',"Trator"),('2','Colheitadeira'),
-              ('3','Arados'),('4','Semeadeiras'),
+               choices=[
+              ('1',"Trator"),
+              ('2','Colheitadeira'),
+              ('3','Arados'),
+              ('4','Semeadeiras'),
               ('5','Fertilizadores'),
               ('6','Geradores'),
               ('7','Pulverizadores'),
               ('8','Empilhadeiras'),
               ('9','Retroescavadeira'),
               ('10','Equipamentos eletrônicos'),
-              ('11','Forrageiras'),], validators=[DataRequired()])
+              ('11','Forrageiras'),],
+               validators=[DataRequired()])
 
     botao_confirmacao=SubmitField("Enviar chamado")
     
