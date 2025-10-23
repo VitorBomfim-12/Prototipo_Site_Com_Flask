@@ -167,9 +167,12 @@ def suporte():
          return redirect(url_for("suporte"))
     return render_template("suporte.html", form = form_chamado)
 
-@app.route("/suporte/chamados-existentes")
+@app.route("/suporte/chamados")
+@login_required
 def chamados():
-    pass
+    lista_chamados = Chamado.query.filter_by(cliente_id=current_user.id).all()
+    print(lista_chamados)
+    return render_template("chamados.html",lista_chamados=lista_chamados)
 
 @app.route("/logout")
 def logout():
