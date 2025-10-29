@@ -207,3 +207,14 @@ padding: 10px;
 text-decoration: none;
 }
 
+
+.alert{
+display: flex;
+justify-content: center;
+background-color: #222;
+color: #ffffff;
+font-size: large;
+max-width: 23%;
+padding: 10px;
+margin: 10px auto;
+}

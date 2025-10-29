@@ -1,9 +1,7 @@
 from flask import Flask,render_template,url_for,redirect,flash,session
 from flask_mail import Mail,Message
 from projeto import app,database,bcrypt,Session
-import os
-import dotenv
-import random
+import random,socket,dotenv,os
 from datetime import date,datetime,timedelta
 from flask_login import login_required, login_user,logout_user,current_user
 from projeto.forms import FormCriarConta, FormLogin, FormContato, Form_Verifica
@@ -61,17 +59,23 @@ def hora_():
 def homepage():
     formlogin = FormLogin()
     if formlogin.validate_on_submit():
-        usuario = Clientes.query.filter_by(email=formlogin.email.data).first()
-        if usuario and  bcrypt.check_password_hash(usuario.senha, formlogin.senha.data):
-            cod=gera_n(6)
-            email_verifica(cod,formlogin.email.data)
-            session["codigo"] = cod
-            session["user"] = usuario
-            session["hora_lancamento"] = datetime.now()
-            return redirect (url_for ("verificacao"))
-        else:
-            flash("Email ou senha incorretos!")
+        try:
             
+            usuario = Clientes.query.filter_by(email=formlogin.email.data).first()
+            if usuario and  bcrypt.check_password_hash(usuario.senha, formlogin.senha.data):
+                cod=gera_n(6)
+                email_verifica(cod,formlogin.email.data)
+                session["codigo"] = cod
+                session["user"] = usuario
+                session["hora_lancamento"] = datetime.now()
+                return redirect (url_for ("verificacao"))
+            elif not usuario:
+                flash("Este email não está cadastrado, crie uma conta!")
+            elif not bcrypt.check_password_hash(usuario.senha, formlogin.senha.data):
+                flash("Senha incorreta!")
+        except socket.gaierror:
+            flash(f"Parece que você esta sem internet!\n Erro: socketgaierror")
+                
            
     return render_template ("homepage.html", form=formlogin)
 
@@ -88,8 +92,9 @@ def verificacao():
     limite = timedelta(minutes=5)
     
     if formverifica.validate_on_submit():
-     
-     if formverifica.codigo_verificacao.data==codigo and diferença < limite:
+     codigo_form=formverifica.codigo_verificacao.data
+     codigo_form=codigo.replace(" ","")
+     if codigo_form==codigo and diferença < limite:
         user = session.get("user")
         login_user(user)
         return redirect (url_for("suporte"))
@@ -101,9 +106,7 @@ def verificacao():
         session.clear()
         flash("Código incorreto!")
         return redirect(url_for("homepage"))
-          
      
-
     return render_template("verifica.html", form = formverifica)
    
       
