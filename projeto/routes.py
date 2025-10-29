@@ -7,7 +7,7 @@ import random
 from datetime import date,datetime,timedelta
 from flask_login import login_required, login_user,logout_user,current_user
 from projeto.forms import FormCriarConta, FormLogin, FormContato, Form_Verifica
-from projeto.models import Clientes, Chamado
+from projeto.models import Clientes, Chamado, Equipamento
 from sqlalchemy.exc import IntegrityError
 from dotenv import load_dotenv
 
@@ -171,6 +171,7 @@ def suporte():
 @login_required
 def chamados():
     lista_chamados = Chamado.query.filter_by(cliente_id=current_user.id).all()
+   
     print(lista_chamados)
     return render_template("chamados.html",lista_chamados=lista_chamados)
 
