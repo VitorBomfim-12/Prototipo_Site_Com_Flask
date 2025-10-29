@@ -2,65 +2,21 @@ from flask import Flask,render_template,url_for,redirect,flash,session
 from flask_mail import Mail,Message
 from projeto import app,database,bcrypt,Session
 import random,socket,dotenv,os
-from datetime import date,datetime,timedelta
+from datetime import timedelta,datetime
 from flask_login import login_required, login_user,logout_user,current_user
 from projeto.forms import FormCriarConta, FormLogin, FormContato, Form_Verifica
 from projeto.models import Clientes, Chamado, Equipamento
 from sqlalchemy.exc import IntegrityError
+from projeto.functions import data_,email_verifica,gera_n,hora_,suporte_email
 from dotenv import load_dotenv
-
     
 dotenv.load_dotenv()
 
-app.config['MAIL_SERVER']='smtp.gmail.com'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USERNAME'] = os.getenv('DEL_EMAIL')
-app.config['MAIL_PASSWORD'] = os.getenv('PASSWORD')
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USE_SSL'] = False
-mail = Mail(app)
-
-
-
-def gera_n(lim):
-     while True:
-         n_chamado=""
-         for i in range (lim):
-             n_chamado+=str(random.randint(0,9))
-
-         teste_chamado_exis= Chamado.query.filter_by(numerochamado=n_chamado).first()
-         if not teste_chamado_exis:
-             return str(n_chamado)
-         
-def email_verifica(n_cham,email):
-    
-    msg_ve = Message(subject=f" Código de verificação ", sender = os.getenv('DEL_EMAIL'), recipients=[email])
-    msg_ve.body = f''' Seu código de verificação é {str(n_cham)}\n\n @Jhon Deere, todos os direitos reservados'''
-    mail.send(msg_ve)
-   
-
-def suporte_email(n_cham,nome,serial,descricao,data,hora,email, telefone):
-    msg = Message(subject=f"Chamado de suporte Nº{n_cham}", sender = os.getenv('DEL_EMAIL'), recipients=[os.getenv('REC_EMAIL')])
-    msg.body = f''' O(a) cliente {nome} requisitou um antendimento \n Serial number: {serial}
-    \n Descrição: {descricao}\n Data e hora {data} , {hora} \n\n Email de retorno: {email} \n Telefone :{telefone}'''
-    mail.send(msg)
-
-def data_():
-    data = date.today()
-    data="{}/{}/{}".format(data.day,data.month,data.year)
-    return data
-        
-def hora_():
-     hora_atual = datetime.now().time()
-     hora_atual=hora_atual.strftime("%H:%M")
-     return hora_atual
-  
 @app.route("/", methods = ["GET","POST"])
 def homepage():
     formlogin = FormLogin()
     if formlogin.validate_on_submit():
         try:
-            
             usuario = Clientes.query.filter_by(email=formlogin.email.data).first()
             if usuario and  bcrypt.check_password_hash(usuario.senha, formlogin.senha.data):
                 cod=gera_n(6)
