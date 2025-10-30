@@ -1,77 +1,36 @@
 from flask import Flask,render_template,url_for,redirect,flash,session
-from flask_mail import Mail,Message
-from projeto import app,database,bcrypt,Session
-import os
-import dotenv
-import random
-from datetime import date,datetime,timedelta
+from projeto import app,database,bcrypt,session
+import socket,dotenv,os
+from datetime import timedelta,datetime
 from flask_login import login_required, login_user,logout_user,current_user
 from projeto.forms import FormCriarConta, FormLogin, FormContato, Form_Verifica
-from projeto.models import Clientes, Chamado
+from projeto.models import Clientes, Chamado, Equipamento
 from sqlalchemy.exc import IntegrityError
+from projeto.functions import data_,email_verifica,gera_n,hora_,suporte_email
 from dotenv import load_dotenv
-
     
 dotenv.load_dotenv()
 
-app.config['MAIL_SERVER']='smtp.gmail.com'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USERNAME'] = os.getenv('DEL_EMAIL')
-app.config['MAIL_PASSWORD'] = os.getenv('PASSWORD')
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USE_SSL'] = False
-mail = Mail(app)
-
-
-
-def gera_n(lim):
-     while True:
-         n_chamado=""
-         for i in range (lim):
-             n_chamado+=str(random.randint(0,9))
-
-         teste_chamado_exis= Chamado.query.filter_by(numerochamado=n_chamado).first()
-         if not teste_chamado_exis:
-             return str(n_chamado)
-         
-def email_verifica(n_cham,email):
-    
-    msg_ve = Message(subject=f" Código de verificação ", sender = os.getenv('DEL_EMAIL'), recipients=[email])
-    msg_ve.body = f''' Seu código de verificação é {str(n_cham)}\n\n @Jhon Deere, todos os direitos reservados'''
-    mail.send(msg_ve)
-   
-
-def suporte_email(n_cham,nome,serial,descricao,data,hora,email, telefone):
-    msg = Message(subject=f"Chamado de suporte Nº{n_cham}", sender = os.getenv('DEL_EMAIL'), recipients=[os.getenv('REC_EMAIL')])
-    msg.body = f''' O(a) cliente {nome} requisitou um antendimento \n Serial number: {serial}
-    \n Descrição: {descricao}\n Data e hora {data} , {hora} \n\n Email de retorno: {email} \n Telefone :{telefone}'''
-    mail.send(msg)
-
-def data_():
-    data = date.today()
-    data="{}/{}/{}".format(data.day,data.month,data.year)
-    return data
-        
-def hora_():
-     hora_atual = datetime.now().time()
-     hora_atual=hora_atual.strftime("%H:%M")
-     return hora_atual
-  
 @app.route("/", methods = ["GET","POST"])
 def homepage():
     formlogin = FormLogin()
     if formlogin.validate_on_submit():
-        usuario = Clientes.query.filter_by(email=formlogin.email.data).first()
-        if usuario and  bcrypt.check_password_hash(usuario.senha, formlogin.senha.data):
-            cod=gera_n(6)
-            email_verifica(cod,formlogin.email.data)
-            session["codigo"] = cod
-            session["user"] = usuario
-            session["hora_lancamento"] = datetime.now()
-            return redirect (url_for ("verificacao"))
-        else:
-            flash("Email ou senha incorretos!")
-            
+        try:
+            usuario = Clientes.query.filter_by(email=formlogin.email.data).first()
+            if usuario and  bcrypt.check_password_hash(usuario.senha, formlogin.senha.data):
+                cod=gera_n(6)
+                email_verifica(cod,formlogin.email.data)
+                session["codigo"] = cod
+                session["user"] = usuario
+                session["hora_lancamento"] = datetime.now()
+                return redirect (url_for ("verificacao"))
+            elif not usuario:
+                flash("Este email não está cadastrado, crie uma conta!")
+            elif not bcrypt.check_password_hash(usuario.senha, formlogin.senha.data):
+                flash("Senha incorreta!")
+        except socket.gaierror:
+            flash(f"Parece que você esta sem internet!\n Erro: socketgaierror")
+                
            
     return render_template ("homepage.html", form=formlogin)
 
@@ -88,8 +47,9 @@ def verificacao():
     limite = timedelta(minutes=5)
     
     if formverifica.validate_on_submit():
-     
-     if formverifica.codigo_verificacao.data==codigo and diferença < limite:
+     codigo_form=formverifica.codigo_verificacao.data
+     codigo_form=codigo.replace(" ","")
+     if codigo_form==codigo and diferença < limite:
         user = session.get("user")
         login_user(user)
         return redirect (url_for("suporte"))
@@ -101,9 +61,7 @@ def verificacao():
         session.clear()
         flash("Código incorreto!")
         return redirect(url_for("homepage"))
-          
      
-
     return render_template("verifica.html", form = formverifica)
    
       
@@ -167,9 +125,13 @@ def suporte():
          return redirect(url_for("suporte"))
     return render_template("suporte.html", form = form_chamado)
 
-@app.route("/suporte/chamados-existentes")
+@app.route("/suporte/chamados")
+@login_required
 def chamados():
-    pass
+    lista_chamados = Chamado.query.filter_by(cliente_id=current_user.id).all()
+   
+    print(lista_chamados)
+    return render_template("chamados.html",lista_chamados=lista_chamados)
 
 @app.route("/logout")
 def logout():

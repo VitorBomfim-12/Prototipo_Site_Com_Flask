@@ -1,0 +1,32 @@
+{%extends "base.html"%}
+
+{%block header%}
+
+<header class="header" style=" background-image: url(../static/imagens/imagens/avulsos/fundo_equipamento.avif)">
+        <figure>
+        </figure>
+        <h1>Meus chamados</h1>
+</header>
+
+{%endblock%}
+
+{%block main%}
+
+{%if lista_chamados%}
+        {%for chamado in lista_chamados%}
+                <div class="grupo-chamados">
+                  <p> <strong>Número do chamado:</strong> {{chamado.numerochamado}}</p>
+                  <p> <strong>Data do chamado:</strong> {{chamado.data}}</p>
+                  <p> <strong>Descrição:</strong> {{chamado.descricao}}</p>
+                  <p> <strong>Serial Numbear:</strong> {{chamado.serialnumber}}</p>
+                  <p> <strong>Categoria do equipamento:</strong> {{chamado.equipamento.tipo}}</p>
+                </div>
+         <br>
+        {%endfor%}
+
+ {%else%}
+   <p>Nenhum chamado</p>
+
+ {%endif%}
+
+{%endblock%}

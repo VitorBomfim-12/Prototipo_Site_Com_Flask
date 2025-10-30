@@ -1,5 +1,6 @@
 .env
-flask_session/
+flask_session
 instance
-projeto/__pycache__
-__pycache__
+projeto/__pycache__/
+__pycache__/
+teste.py
