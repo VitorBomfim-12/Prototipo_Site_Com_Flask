@@ -6,12 +6,28 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
 
-    <title>{%block title%} Meu site{%endblock%}</title>
+    <title>{%block title%} {%endblock%}</title>
 </head>
 <body>
 
     <header>{%block header%}Teste site{%endblock%}</header>
-    <nav>{%block nav%} {%endblock%}</nav>
+
+        <nav class="navbar">
+            {%block nav%}
+     <ul>
+      <li><a href="{{url_for('suporte')}}">Suporte</a></li>
+      <li><a href="">Contato</a></li>
+      <li><a href="{{url_for('chamados')}}">Meus chamados</a></li>
+     </ul>
+    
+     <div> 
+      <ul><li><a href="{{url_for('logout')}}">Sair</a></li></ul>
+     </div>
+         
+   
+       {%endblock%}
+    </nav>
+       
     <main>{%block main%} conteudo {%endblock%}</main>
     
 </body>

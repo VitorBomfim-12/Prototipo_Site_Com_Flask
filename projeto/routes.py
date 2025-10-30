@@ -1,7 +1,6 @@
 from flask import Flask,render_template,url_for,redirect,flash,session
-from flask_mail import Mail,Message
-from projeto import app,database,bcrypt,Session
-import random,socket,dotenv,os
+from projeto import app,database,bcrypt,session
+import socket,dotenv,os
 from datetime import timedelta,datetime
 from flask_login import login_required, login_user,logout_user,current_user
 from projeto.forms import FormCriarConta, FormLogin, FormContato, Form_Verifica

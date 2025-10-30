@@ -1,5 +1,5 @@
 .env
 flask_session
 instance
-projeto/__pycache__
+projeto/__pycache__/
 __pycache__/
