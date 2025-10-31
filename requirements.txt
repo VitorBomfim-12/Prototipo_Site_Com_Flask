@@ -27,7 +27,7 @@ pillow ==11.3.0
 pip==25.2
 platformdirs== 4.4.0
 pyparsing== 3.2.3
-python-dateutil=  == 2.9.0.post0
+python-dateutil == 2.9.0.post0
 six==1.17.0
 SQLAlchemy==2.0.43
 typing_extensions ==4.15.0
