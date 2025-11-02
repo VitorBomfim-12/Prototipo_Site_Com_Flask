@@ -1,6 +1,6 @@
 from projeto import database, login_manager
 from flask_login import UserMixin
-
+import datetime
 
 @login_manager.user_loader
 def load_usuario(id_usuario):
@@ -28,10 +28,15 @@ class Chamado(database.Model):
     
     id = database.Column(database.Integer, primary_key=True)
     numerochamado= database.Column(database.Integer, nullable=False, unique=True)
-    data= database.Column(database.String,nullable=False, )
-    hora= database.Column(database.String,nullable=False, )
+    data= database.Column(database.String,nullable=False)
+    hora= database.Column(database.String,nullable=False)
     descricao= database.Column(database.String, nullable=False)
     serialnumber= database.Column(database.String, nullable=False)
     cliente_id = database.Column(database.Integer, database.ForeignKey('clientes.id'),nullable=False)
     equipamento_id = database.Column(database.Integer,database.ForeignKey('equipamento.id'),nullable=False)
     
+class CodigosMFA(database.Model):
+     id = database.Column(database.Integer, primary_key=True)
+     cod_hash = database.Column(database.String,nullable=False)
+     hora_cod = database.Column(database.DateTime, default=datetime.utcnow)
+     user_id =  database.Column(database.Integer, database.ForeignKey('clientes.id'),nullable=False)

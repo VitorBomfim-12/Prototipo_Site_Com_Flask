@@ -4,7 +4,7 @@ import socket,dotenv,os
 from datetime import timedelta,datetime
 from flask_login import login_required, login_user,logout_user,current_user
 from projeto.forms import FormCriarConta, FormLogin, FormContato, Form_Verifica
-from projeto.models import Clientes, Chamado, Equipamento
+from projeto.models import Clientes, Chamado, Equipamento,CodigosMFA
 from sqlalchemy.exc import IntegrityError
 from projeto.functions import data_,email_verifica,gera_n,hora_,suporte_email
 from dotenv import load_dotenv
@@ -19,10 +19,11 @@ def homepage():
             usuario = Clientes.query.filter_by(email=formlogin.email.data).first()
             if usuario and  bcrypt.check_password_hash(usuario.senha, formlogin.senha.data):
                 cod=gera_n(6)
+                hash_cod = bcrypt.generate_password_hash(cod).decode('utf-8')
+                mfa_gerado = CodigosMFA(cod_hash = hash_cod,
+                                        user_id=usuario.id)
                 email_verifica(cod,formlogin.email.data)
-                session["codigo"] = cod
-                session["user"] = usuario
-                session["hora_lancamento"] = datetime.now()
+                
                 return redirect (url_for ("verificacao"))
             elif not usuario:
                 flash("Este email não está cadastrado, crie uma conta!")
@@ -39,7 +40,6 @@ def homepage():
 def verificacao():
 
     formverifica=Form_Verifica()
-    codigo = session.get("codigo")
     hora_do_envio=session.get("hora_lancamento")
 
     hora_atual=datetime.now()
@@ -47,8 +47,7 @@ def verificacao():
     limite = timedelta(minutes=5)
     
     if formverifica.validate_on_submit():
-     codigo_form=formverifica.codigo_verificacao.data
-     codigo_form=codigo.replace(" ","")
+   
      if codigo_form==codigo and diferença < limite:
         user = session.get("user")
         login_user(user)
