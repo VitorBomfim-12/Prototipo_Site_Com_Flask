@@ -18,7 +18,7 @@ def homepage():
         try:
             usuario = Clientes.query.filter_by(email=formlogin.email.data).first()
             if usuario and  bcrypt.check_password_hash(usuario.senha, formlogin.senha.data):
-                session["user_attempt"] = usuario.id 
+                session["user_attempt"] = usuario.id
                 cod=gera_n(6)
                 hash_cod = bcrypt.generate_password_hash(cod).decode('utf-8')
                 mfa_gerado = CodigosMFA(cod_hash = hash_cod,
@@ -35,6 +35,7 @@ def homepage():
 
             elif not bcrypt.check_password_hash(usuario.senha, formlogin.senha.data):
                 flash("Senha incorreta!")
+
         except socket.gaierror:
             flash(f"Parece que você esta sem internet!\n Erro: socketgaierror")
                 
@@ -48,29 +49,40 @@ def verificacao():
     formverifica=Form_Verifica()
 
     user = session.get('user_attempt')
-    tentativa_acess = CodigosMFA.query.filter_by(user_id=user)
+    user_id_attempt = Clientes.query.filter_by(id=user).first()
+    tentativa_acess= CodigosMFA.query.filter_by(user_id=user).first()
 
+    print(f"---------TESTE PARA DESENVOLVEDOR----------\n {user_id_attempt.id} - USUARIO NO CLIENTES\n"
+          f"{tentativa_acess.id}   ID NO BANCO DE DADOS\n"
+          f"{user_id_attempt.email}EMAIL DO USUÁRIO PARA CHECAGEM")
+    
     hora_envio_cod = tentativa_acess.hora_cod
     hora_atual=datetime.now()
     diferença = hora_atual - hora_envio_cod
     limite = timedelta(minutes=5)
     
     if formverifica.validate_on_submit():
-   
      if bcrypt.check_password_hash(tentativa_acess.cod_hash , formverifica.codigo_verificacao.data):
-        login_user(user)
+        login_user(user_id_attempt)
         session.pop('user_attempt')
+        CodigosMFA.query.filter_by(user_id=user).delete()
+        database.session.commit()
         return redirect (url_for("suporte"))
      
      elif diferença > limite: 
         session.clear()
         flash("Código expirado")
+        CodigosMFA.query.filter_by(user_id=user).delete()
+        database.session.commit()
         return redirect(url_for("homepage"))
+     
      elif formverifica.codigo_verificacao.data!=tentativa_acess.cod_hash:
         session.clear()
         flash("Código incorreto!")
+        CodigosMFA.query.filter_by(user_id=user).delete()
+        database.session.commit()
         return redirect(url_for("homepage"))
-     
+    
     return render_template("verifica.html", form = formverifica)
    
       
@@ -93,8 +105,9 @@ def criarconta():
 
          database.session.add(cliente)
          database.session.commit()
-         login_user(cliente,remember=True)
-         return redirect(url_for("suporte"))
+        
+         flash("faça login!")
+         return redirect(url_for("homepage"))
         
         except IntegrityError:
             database.session.rollback()
