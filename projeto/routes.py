@@ -1,7 +1,7 @@
 from flask import Flask,render_template,url_for,redirect,flash,session
 from projeto import app,database,bcrypt,session
 import socket,dotenv,os
-from datetime import timedelta,datetime
+from datetime import timedelta,datetime, timezone
 from flask_login import login_required, login_user,logout_user,current_user
 from projeto.forms import FormCriarConta, FormLogin, FormContato, Form_Verifica
 from projeto.models import Clientes, Chamado, Equipamento,CodigosMFA
@@ -18,15 +18,21 @@ def homepage():
         try:
             usuario = Clientes.query.filter_by(email=formlogin.email.data).first()
             if usuario and  bcrypt.check_password_hash(usuario.senha, formlogin.senha.data):
+                session["user_attempt"] = usuario.id 
                 cod=gera_n(6)
                 hash_cod = bcrypt.generate_password_hash(cod).decode('utf-8')
                 mfa_gerado = CodigosMFA(cod_hash = hash_cod,
                                         user_id=usuario.id)
+                
+                database.session.add(mfa_gerado)
+                database.session.commit()
                 email_verifica(cod,formlogin.email.data)
                 
                 return redirect (url_for ("verificacao"))
+            
             elif not usuario:
                 flash("Este email não está cadastrado, crie uma conta!")
+
             elif not bcrypt.check_password_hash(usuario.senha, formlogin.senha.data):
                 flash("Senha incorreta!")
         except socket.gaierror:
@@ -40,23 +46,27 @@ def homepage():
 def verificacao():
 
     formverifica=Form_Verifica()
-    hora_do_envio=session.get("hora_lancamento")
 
+    user = session.get('user_attempt')
+    tentativa_acess = CodigosMFA.query.filter_by(user_id=user)
+
+    hora_envio_cod = tentativa_acess.hora_cod
     hora_atual=datetime.now()
-    diferença = hora_atual-hora_do_envio
+    diferença = hora_atual - hora_envio_cod
     limite = timedelta(minutes=5)
     
     if formverifica.validate_on_submit():
    
-     if codigo_form==codigo and diferença < limite:
-        user = session.get("user")
+     if bcrypt.check_password_hash(tentativa_acess.cod_hash , formverifica.codigo_verificacao.data):
         login_user(user)
+        session.pop('user_attempt')
         return redirect (url_for("suporte"))
+     
      elif diferença > limite: 
         session.clear()
         flash("Código expirado")
         return redirect(url_for("homepage"))
-     elif formverifica.codigo_verificacao.data!=codigo:
+     elif formverifica.codigo_verificacao.data!=tentativa_acess.cod_hash:
         session.clear()
         flash("Código incorreto!")
         return redirect(url_for("homepage"))
@@ -73,7 +83,7 @@ def criarconta():
              flash("As senhas devem ser iguais!")
              return redirect(url_for("criarconta"))
         try:
-         senha = bcrypt.generate_password_hash(formcriarconta.senha.data)
+         senha = bcrypt.generate_password_hash(formcriarconta.senha.data).decode('utf-8')
          cliente=Clientes(clientname = formcriarconta.username.data,
                          email = formcriarconta.email.data,
                          senha = senha,
