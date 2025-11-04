@@ -1,7 +1,7 @@
 from flask import Flask,render_template,url_for,redirect,flash,session
 from projeto import app,database,bcrypt,session
-import socket,dotenv,os
-from datetime import timedelta,datetime, timezone
+import socket,dotenv
+from datetime import timedelta,datetime
 from flask_login import login_required, login_user,logout_user,current_user
 from projeto.forms import FormCriarConta, FormLogin, FormContato, Form_Verifica
 from projeto.models import Clientes, Chamado, Equipamento,CodigosMFA
@@ -52,24 +52,24 @@ def verificacao():
     user_id_attempt = Clientes.query.filter_by(id=user).first()
     tentativa_acess= CodigosMFA.query.filter_by(user_id=user).first()
 
-    print(f"---------TESTE PARA DESENVOLVEDOR----------\n {user_id_attempt.id} - USUARIO NO CLIENTES\n"
-          f"{tentativa_acess.id}   ID NO BANCO DE DADOS\n"
-          f"{user_id_attempt.email}EMAIL DO USUÁRIO PARA CHECAGEM")
-    
+
     hora_envio_cod = tentativa_acess.hora_cod
-    hora_atual=datetime.now()
+    hora_atual=datetime.utcnow()
     diferença = hora_atual - hora_envio_cod
-    limite = timedelta(minutes=5)
+    limite = timedelta(minutes=3)
     
     if formverifica.validate_on_submit():
-     if bcrypt.check_password_hash(tentativa_acess.cod_hash , formverifica.codigo_verificacao.data):
+     if bcrypt.check_password_hash(tentativa_acess.cod_hash , formverifica.codigo_verificacao.data) and diferença<limite:
+
         login_user(user_id_attempt)
         session.pop('user_attempt')
         CodigosMFA.query.filter_by(user_id=user).delete()
         database.session.commit()
+
         return redirect (url_for("suporte"))
      
      elif diferença > limite: 
+
         session.clear()
         flash("Código expirado")
         CodigosMFA.query.filter_by(user_id=user).delete()
@@ -77,6 +77,7 @@ def verificacao():
         return redirect(url_for("homepage"))
      
      elif formverifica.codigo_verificacao.data!=tentativa_acess.cod_hash:
+
         session.clear()
         flash("Código incorreto!")
         CodigosMFA.query.filter_by(user_id=user).delete()
@@ -142,8 +143,7 @@ def suporte():
                        form_chamado.serial_number.data,
                        form_chamado.descricao.data,data,
                        hora_atual,current_user.email,
-                       current_user.telefone
-                       )
+                       current_user.telefone)
          return redirect(url_for("suporte"))
     return render_template("suporte.html", form = form_chamado)
 
@@ -151,8 +151,6 @@ def suporte():
 @login_required
 def chamados():
     lista_chamados = Chamado.query.filter_by(cliente_id=current_user.id).all()
-   
-    print(lista_chamados)
     return render_template("chamados.html",lista_chamados=lista_chamados)
 
 @app.route("/logout")
