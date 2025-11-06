@@ -56,8 +56,11 @@ def verificacao():
     hora_envio_cod = tentativa_acess.hora_cod
     hora_atual=datetime.utcnow()
     diferença = hora_atual - hora_envio_cod
-    limite = timedelta(minutes=3)
+    limite = timedelta(minutes=10)
     
+    print(f"-----TESTE-----\n"
+          f"{hora_atual} ----- Hora atual"
+          f"{tentativa_acess.hora_cod} ----- Hora de envio do código")
     if formverifica.validate_on_submit():
      if bcrypt.check_password_hash(tentativa_acess.cod_hash , formverifica.codigo_verificacao.data) and diferença<limite:
 
