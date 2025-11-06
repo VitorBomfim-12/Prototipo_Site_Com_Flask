@@ -8,7 +8,7 @@
 <p> Colocar em prática conhecimentos adquiridos durante o curso de ADS, como o Framework de micro-desenvolvimento Web, HTML e CSS, uso de banco de dados, respeito a normas de conformidade para segurança na programação, como MFA, hashing, Segurança em bancos de dados e privacidade dos dados.</p>
 
 ## 📄Descrição
-<p> Criar um site que forneca contato entre o cliente que possui equipamentos agrícolas e soluções de suporte técnico, como acesso a seguros, página com duvidas frequentes e contato direto com equipes via formulários de contato.</p>
+<p> A aplicação WEB deve fornecer contato entre o cliente que possui equipamentos agrícolas e o time responsável pelo contato direto ao cliente (SAC). Também deve ter medidas de segurança de dados, como hashing e necessidade de login para acessar os própios chamados e informações pessoais</p>
 
 ## 🖥️Tecnlogias utilizadas
  <a href="https://www.python.org/"><img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white"></a>
