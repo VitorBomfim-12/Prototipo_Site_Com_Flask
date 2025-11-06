@@ -1,7 +1,7 @@
 <h1 aling ="center"> Sistema de helpdesk com MFA</h1>
 
 
-## 🚨Disclaimer
+## 🚨Aviso
 <p> Este projeto tem como objetivo colocar em prática conhecimentos adquiridos durante o curso de ADS, como Flask, HTML, CSS, banco de dados, Python e etc, sendo puramente de cunho acadêmico, não tendo fins comerciais ou vinculados a marca John Deere.</p>
 
 ## 🎯Objetivo:
@@ -15,5 +15,9 @@
  <a href="https://flask.palletsprojects.com/en/stable"><img src="https://img.shields.io/badge/FLASK-FLASK?style=for-the-badge&logo=flask&logoColor=white&labelColor=%233BABC3&color=%233BABC3"/></a>
  <a href="https://sqlite.org/"><img src="https://img.shields.io/badge/SQLITE-blue?style=for-the-badge&logo=sqlite&logoColor=white&labelColor=%23003B57&color=%23003B57"/></a>
  <a href="https://flask-sqlalchemy.readthedocs.io/en/stable/quickstart/"><img src="https://img.shields.io/badge/Flask-SQLAlchemy?style=for-the-badge&logo=sqlalchemy&label=SQLalchemy&color=%23D71F00"/></a>
+ <a href = "https://www.w3schools.com/html/"> <img src="https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white" /></a>
+ <a href ="https://www.w3schools.com/Css/"> <img src="https://img.shields.io/badge/CSS3-blue?style=for-the-badge&logo=css&logoColor=white&labelColor=%23663399&color=%23663399"/></a>
+
+
 
 
