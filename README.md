@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 =======
 <h1 aling ="center"> Sistema de helpdesk com MFA</h1>
 
