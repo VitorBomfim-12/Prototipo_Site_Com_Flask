@@ -1,13 +1,14 @@
 from flask import Flask,render_template,url_for,redirect,flash,session
-from projeto import app,database,bcrypt,session
+from projeto import app,bcrypt,session
 import socket,dotenv
 from datetime import timedelta,datetime
 from flask_login import login_required, login_user,logout_user,current_user
 from projeto.forms import FormCriarConta, FormLogin, FormContato, Form_Verifica
 from projeto.models import Clientes, Chamado, Equipamento,CodigosMFA
 from sqlalchemy.exc import IntegrityError
-from projeto.functions import data_,email_verifica,gera_n,hora_,suporte_email,get_db_connection
+from projeto.functions import data_,email_verifica,gera_n,hora_,suporte_email,get_db_connection,create_cur
 from dotenv import load_dotenv
+import pymysql, pymysql.cursors
     
 dotenv.load_dotenv()
 
@@ -15,7 +16,15 @@ dotenv.load_dotenv()
 def homepage():
     formlogin = FormLogin()
     if formlogin.validate_on_submit():
-        try:
+            email  = formlogin.email.data
+            con = get_db_connection()
+            if con:
+                cur = create_cur()
+                cur.execute ('select * from Users where email = %s'(email))
+                user = cur.fetchone()
+                cur.close()
+                con.close()
+                
             usuario = Clientes.query.filter_by(email=formlogin.email.data).first()
             if usuario and  bcrypt.check_password_hash(usuario.senha, formlogin.senha.data):
                 session["user_attempt"] = usuario.id
@@ -36,9 +45,7 @@ def homepage():
             elif not bcrypt.check_password_hash(usuario.senha, formlogin.senha.data):
                 flash("Senha incorreta!")
 
-        except socket.gaierror:
-            flash(f"Parece que você esta sem internet!\n Erro: socketgaierror")
-                
+      
            
     return render_template ("homepage.html", form=formlogin)
 
