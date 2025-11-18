@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 def load_usuario(id_usuario):
     return Clientes.query.get(int(id_usuario))
 
-#usermixin permite que uma classe gerecie os perfis
+
 
 class Clientes(database.Model,UserMixin):
     

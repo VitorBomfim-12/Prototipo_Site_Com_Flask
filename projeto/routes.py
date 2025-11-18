@@ -6,7 +6,7 @@ from flask_login import login_required, login_user,logout_user,current_user
 from projeto.forms import FormCriarConta, FormLogin, FormContato, Form_Verifica
 from projeto.models import Clientes, Chamado, Equipamento,CodigosMFA
 from sqlalchemy.exc import IntegrityError
-from projeto.functions import data_,email_verifica,gera_n,hora_,suporte_email
+from projeto.functions import data_,email_verifica,gera_n,hora_,suporte_email,get_db_connection
 from dotenv import load_dotenv
     
 dotenv.load_dotenv()

@@ -2,8 +2,10 @@ from projeto import mail
 from flask_mail import Message
 from projeto.models import Chamado
 from datetime import date,datetime
-import random,os
+import random,os,dotenv
+import pymysql
 
+dotenv.load_dotenv()
 def gera_n(lim):
      while True:
          n_chamado=""
@@ -37,3 +39,13 @@ def hora_():
      hora_atual=hora_atual.strftime("%H:%M")
      return hora_atual
   
+
+def get_db_connection():
+    connection = pymysql.connect(
+        host='localhost',
+        user='root',
+        password=os.getenv("DB_password"),
+        database='helpdesk',
+        cursorclass=pymysql.cursors.DictCursor
+    )
+    return connection
