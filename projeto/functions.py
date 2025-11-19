@@ -3,7 +3,7 @@ from flask_mail import Message
 from projeto.models import Chamado
 from datetime import date,datetime
 import random,os,dotenv
-import pymysql
+import pymysql, pymysql.cursors
 from projeto import login_manager
 from flask_login import UserMixin
 
@@ -52,12 +52,22 @@ def get_db_connection():
     )
     return connection
 
-def create_cur():
-       con = get_db_connection()
-       cur = con.cursor(pymysql.cursors.DictCursor)
-       return cur
 
 @login_manager.user_loader
 def load_usuario(id_usuario):
-    pass
+    try:
+        con = get_db_connection()
+        cur = con.cursor(pymysql.cursors.DictCursor)
+        cur.execute("SELECT * FROM users WHERE id = %s",id_usuario)
+
+        dados_usuario = cur.fetchone()
+        if dados_usuario:
+            usuario_obj.id = dados_usuario['id']
+            usuario_obj.clientname = dados_usuario['username']
+            usuario_obj.email = dados_usuario['email']
+            usuario_obj.cpf = dados_usuario['cpf']
+            usuario_obj.telefone = dados_usuario['phone_number']
+            usuario_obj.senha = dados_usuario['password_user']
+    finally:
+        con.close()
 
