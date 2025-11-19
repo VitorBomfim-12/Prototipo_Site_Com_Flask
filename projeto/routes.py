@@ -17,121 +17,81 @@ def homepage():
     formlogin = FormLogin()
     if formlogin.validate_on_submit():
             
-        try:
+    
             email_digitado  = formlogin.email.data
-
             con = get_db_connection()
             if con:
-                cur = create_cur()
-                cur.execute ('select * from users where email = %s limit 1'(email_digitado))
-                usuario = cur.fetchone()
-        
-                if usuario and  bcrypt.check_password_hash(usuario['password_user'], formlogin.senha.data):
-                    session["user_attempt"] = usuario['id']
-                    cod=gera_n(6)
-                    hash_cod = bcrypt.generate_password_hash(cod).decode('utf-8')
-                    cur.execute(""" insert into codigosmfa (cod_hash,user_id)""",(cod,usuario['id']))
-                   
-                    email_verifica(cod,formlogin.email.data)
+                try:
+                    cur = con.cursor(pymysql.cursors.DictCursor)
+                    cur.execute ('select * from users where email = %s limit 1'(email_digitado))
+                    usuario = cur.fetchone()
+            
+                    if usuario and  bcrypt.check_password_hash(usuario['password_user'], formlogin.senha.data):
+                        session["user_attempt"] = usuario['id']
+                        cod=gera_n(6)
+                        hash_cod = bcrypt.generate_password_hash(cod).decode('utf-8')
+                        cur.execute(""" insert into codigosmfa (cod_hash,user_id)""",(cod,usuario['id']))
                     
-                  
-                    return redirect (url_for ("verificacao"))
-                
-                elif not usuario:
-                    flash("Este email não está cadastrado, crie uma conta!")
+                        email_verifica(cod,formlogin.email.data)
+                        
                     
-                   
-                elif not bcrypt.check_password_hash(usuario.senha, formlogin.senha.data):
-                    flash("Senha incorreta!")
+                        return redirect (url_for ("verificacao"))
                     
+                    elif not usuario:
+                        flash("Este email não está cadastrado, crie uma conta!")
+                        
                     
+                    elif not bcrypt.check_password_hash(usuario.senha, formlogin.senha.data):
+                        flash("Senha incorreta!")
+                        
+                finally:
+                    cur.close()
+                    con.close()
             else: flash("Erro ao conectar ao banco")
-        finally:
-            cur.close()
-            con.close()
-           
+            
     return render_template ("homepage.html", form=formlogin)
 
-
-@app.route("/verifica", methods =["GET","POST"])
-def verificacao():
-
-    formverifica=Form_Verifica()
-    user = session.get('user_attempt')
-    
-    con = get_db_connection()
-    cur = create_cur()
-    
-    cur.execute("select * from codigosmfa where user_id = %s",user)
-    user_id_attempt = cur.fetchone()
-    hora_envio_cod = user_id_attempt['hora_cod']
-    codigo = user_id_attempt['cod_hash']
-    
-    hora_atual=datetime.utcnow()
-    diferença = hora_atual - hora_envio_cod
-    limite = timedelta(minutes=10)
-    
-    print(f"-----TESTE-----\n"
-          f"{hora_atual} ----- Hora atual"
-          f"{hora_envio_cod} ----- Hora de envio do código")
-  
-    if formverifica.validate_on_submit():
-        try:
-            if bcrypt.check_password_hash(codigo , formverifica.codigo_verificacao.data) and diferença<limite:
-
-                login_user(user_id_attempt)
-                session.pop('user_attempt')
-                cur.execute("DELETE FROM codigosmfa WHERE user_id = %s",user)
-                return redirect (url_for("suporte"))
-            
-            elif diferença > limite: 
-
-                session.clear()
-                flash("Código expirado")
-                cur.execute("DELETE FROM codigosmfa WHERE user_id = %s",user)
-                return redirect(url_for("homepage"))
-            
-            elif not bcrypt.check_password_hash(codigo , formverifica.codigo_verificacao.data):
-
-                session.clear()
-                flash("Código incorreto!")
-                cur.execute("DELETE FROM codigosmfa WHERE user_id = %s",user)
-                return redirect(url_for("homepage"))
-            
-        finally:
-         con.commit()
-         con.close()
-         cur.close()        
-    return render_template("verifica.html", form = formverifica)
-   
       
 @app.route("/criarconta", methods =["GET","POST"])
 def criarconta():
     
     formcriarconta = FormCriarConta()
     if formcriarconta.validate_on_submit():
-        if formcriarconta.confirmacao_senha.data != formcriarconta.senha.data:
-             flash("As senhas devem ser iguais!")
-             return redirect(url_for("criarconta"))
-        try:
-         senha = bcrypt.generate_password_hash(formcriarconta.senha.data).decode('utf-8')
-         cliente=Clientes(clientname = formcriarconta.username.data,
-                         email = formcriarconta.email.data,
-                         senha = senha,
-                         CPF = formcriarconta.CPF.data,
-                         telefone = formcriarconta.telefone.data)
-         
+        
 
-         database.session.add(cliente)
-         database.session.commit()
+        email_digitado=formcriarconta.email.data
+        con = get_db_connection()
         
-         flash("faça login!")
-         return redirect(url_for("homepage"))
-        
-        except IntegrityError:
-            database.session.rollback()
-            flash("Email, CPF, ou telefone já cadastrado! faça login ")
-            return redirect(url_for("homepage"))
+        if con:
+            try:   
+                cur = con.cursor(pymysql.cursors.DictCursor)
+                cur.execute ("SELECT * FROM users where email = %s",email_digitado)
+                usuario = cur.fetchone()
+
+                if formcriarconta.confirmacao_senha.data != formcriarconta.senha.data:
+                    flash("As senhas devem ser iguais!")
+                    return redirect(url_for("criarconta"))
+                if not usuario:
+                    senha = bcrypt.generate_password_hash(formcriarconta.senha.data).decode('utf-8')
+                    
+                    cur.execute("INSERT INTO users (username,password_user,cpf,email,phone_number) VALUES (%s,%s,%s,%s,%s)",
+                                formcriarconta.username.data,
+                                senha,
+                                formcriarconta.email.data,
+                                formcriarconta.CPF.data,
+                                formcriarconta.telefone.data)
+                    con.commit()
+                    flash("faça login!")
+                    return redirect(url_for("homepage"))
+                
+                else:
+                    con.rollback()
+                    flash("Email, CPF, ou telefone já cadastrado! faça login ")
+                    return redirect(url_for("homepage"))
+            finally:
+                con.close()
+                cur.close()
+        else: flash("Erro ao conectar ao banco")
         
     return render_template("criarconta.html", form = formcriarconta)
 
