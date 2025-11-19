@@ -16,35 +16,37 @@ dotenv.load_dotenv()
 def homepage():
     formlogin = FormLogin()
     if formlogin.validate_on_submit():
-            email  = formlogin.email.data
+            email_digitado  = formlogin.email.data
+
             con = get_db_connection()
             if con:
                 cur = create_cur()
-                cur.execute ('select * from Users where email = %s'(email))
-                user = cur.fetchone()
-                cur.close()
-                con.close()
+                cur.execute ('select * from users where email = %s limit 1'(email_digitado))
+                usuario = cur.fetchone()
+        
+                if usuario and  bcrypt.check_password_hash(usuario['password_user'], formlogin.senha.data):
+                    session["user_attempt"] = usuario['id']
+                    cod=gera_n(6)
+                    hash_cod = bcrypt.generate_password_hash(cod).decode('utf-8')
+                    cur.execute(""" insert into codigosmfa (cod_hash,user_id)""",(cod,usuario['id']))
+                   
+                    email_verifica(cod,formlogin.email.data)
+                    
+                    cur.close()
+                    con.close()
+                    return redirect (url_for ("verificacao"))
                 
-            usuario = Clientes.query.filter_by(email=formlogin.email.data).first()
-            if usuario and  bcrypt.check_password_hash(usuario.senha, formlogin.senha.data):
-                session["user_attempt"] = usuario.id
-                cod=gera_n(6)
-                hash_cod = bcrypt.generate_password_hash(cod).decode('utf-8')
-                mfa_gerado = CodigosMFA(cod_hash = hash_cod,
-                                        user_id=usuario.id)
-                
-                database.session.add(mfa_gerado)
-                database.session.commit()
-                email_verifica(cod,formlogin.email.data)
-                
-                return redirect (url_for ("verificacao"))
-            
-            elif not usuario:
-                flash("Este email não está cadastrado, crie uma conta!")
-
-            elif not bcrypt.check_password_hash(usuario.senha, formlogin.senha.data):
-                flash("Senha incorreta!")
-
+                elif not usuario:
+                    flash("Este email não está cadastrado, crie uma conta!")
+                    
+                    cur.close()
+                    con.close()
+                elif not bcrypt.check_password_hash(usuario.senha, formlogin.senha.data):
+                    flash("Senha incorreta!")
+                    
+                    cur.close()
+                    con.close()
+            else: flash("Erro ao conectar ao banco")
       
            
     return render_template ("homepage.html", form=formlogin)

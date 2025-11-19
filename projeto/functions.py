@@ -52,5 +52,5 @@ def get_db_connection():
 
 def create_cur():
        con = get_db_connection()
-       cur = con.cursor(pymysql.cursor.DictCursos)
+       cur = con.cursor(pymysql.cursors.DictCursor)
        return cur
