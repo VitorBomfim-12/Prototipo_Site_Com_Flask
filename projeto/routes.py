@@ -16,6 +16,8 @@ dotenv.load_dotenv()
 def homepage():
     formlogin = FormLogin()
     if formlogin.validate_on_submit():
+            
+        try:
             email_digitado  = formlogin.email.data
 
             con = get_db_connection()
@@ -32,22 +34,21 @@ def homepage():
                    
                     email_verifica(cod,formlogin.email.data)
                     
-                    cur.close()
-                    con.close()
+                  
                     return redirect (url_for ("verificacao"))
                 
                 elif not usuario:
                     flash("Este email não está cadastrado, crie uma conta!")
                     
-                    cur.close()
-                    con.close()
+                   
                 elif not bcrypt.check_password_hash(usuario.senha, formlogin.senha.data):
                     flash("Senha incorreta!")
                     
-                    cur.close()
-                    con.close()
+                    
             else: flash("Erro ao conectar ao banco")
-      
+        finally:
+            cur.close()
+            con.close()
            
     return render_template ("homepage.html", form=formlogin)
 
@@ -56,46 +57,51 @@ def homepage():
 def verificacao():
 
     formverifica=Form_Verifica()
-
     user = session.get('user_attempt')
-    user_id_attempt = Clientes.query.filter_by(id=user).first()
-    tentativa_acess= CodigosMFA.query.filter_by(user_id=user).first()
-
-
-    hora_envio_cod = tentativa_acess.hora_cod
+    
+    con = get_db_connection()
+    cur = create_cur()
+    
+    cur.execute("select * from codigosmfa where user_id = %s",user)
+    user_id_attempt = cur.fetchone()
+    hora_envio_cod = user_id_attempt['hora_cod']
+    codigo = user_id_attempt['cod_hash']
+    
     hora_atual=datetime.utcnow()
     diferença = hora_atual - hora_envio_cod
     limite = timedelta(minutes=10)
     
     print(f"-----TESTE-----\n"
           f"{hora_atual} ----- Hora atual"
-          f"{tentativa_acess.hora_cod} ----- Hora de envio do código")
+          f"{hora_envio_cod} ----- Hora de envio do código")
+  
     if formverifica.validate_on_submit():
-     if bcrypt.check_password_hash(tentativa_acess.cod_hash , formverifica.codigo_verificacao.data) and diferença<limite:
+        try:
+            if bcrypt.check_password_hash(codigo , formverifica.codigo_verificacao.data) and diferença<limite:
 
-        login_user(user_id_attempt)
-        session.pop('user_attempt')
-        CodigosMFA.query.filter_by(user_id=user).delete()
-        database.session.commit()
+                login_user(user_id_attempt)
+                session.pop('user_attempt')
+                cur.execute("DELETE FROM codigosmfa WHERE user_id = %s",user)
+                return redirect (url_for("suporte"))
+            
+            elif diferença > limite: 
 
-        return redirect (url_for("suporte"))
-     
-     elif diferença > limite: 
+                session.clear()
+                flash("Código expirado")
+                cur.execute("DELETE FROM codigosmfa WHERE user_id = %s",user)
+                return redirect(url_for("homepage"))
+            
+            elif not bcrypt.check_password_hash(codigo , formverifica.codigo_verificacao.data):
 
-        session.clear()
-        flash("Código expirado")
-        CodigosMFA.query.filter_by(user_id=user).delete()
-        database.session.commit()
-        return redirect(url_for("homepage"))
-     
-     elif formverifica.codigo_verificacao.data!=tentativa_acess.cod_hash:
-
-        session.clear()
-        flash("Código incorreto!")
-        CodigosMFA.query.filter_by(user_id=user).delete()
-        database.session.commit()
-        return redirect(url_for("homepage"))
-    
+                session.clear()
+                flash("Código incorreto!")
+                cur.execute("DELETE FROM codigosmfa WHERE user_id = %s",user)
+                return redirect(url_for("homepage"))
+            
+        finally:
+         con.commit()
+         con.close()
+         cur.close()        
     return render_template("verifica.html", form = formverifica)
    
       
