@@ -4,6 +4,8 @@ from projeto.models import Chamado
 from datetime import date,datetime
 import random,os,dotenv
 import pymysql
+from projeto import login_manager
+from flask_login import UserMixin
 
 dotenv.load_dotenv()
 def gera_n(lim):
@@ -54,3 +56,8 @@ def create_cur():
        con = get_db_connection()
        cur = con.cursor(pymysql.cursors.DictCursor)
        return cur
+
+@login_manager.user_loader
+def load_usuario(id_usuario):
+    pass
+

@@ -1,11 +1,6 @@
-from projeto import database, login_manager
-from flask_login import UserMixin
+
 import datetime
 from datetime import datetime, timezone
-
-@login_manager.user_loader
-def load_usuario(id_usuario):
-    return Clientes.query.get(int(id_usuario))
 
 
 
