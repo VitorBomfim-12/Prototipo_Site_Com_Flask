@@ -10,7 +10,7 @@ app = Flask(__name__)
     
 dotenv.load_dotenv()
 
-app.secret_key ="teste__#sahlinse&#$@crdone"
+app.secret_key = os.getenv('SECRET_KEY')
 #criação do banco de dados
 
 
