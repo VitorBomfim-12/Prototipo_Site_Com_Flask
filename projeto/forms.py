@@ -2,7 +2,7 @@ from flask_wtf import FlaskForm #biblioteca que permite a criação de formulár
 from wtforms import StringField, PasswordField,SubmitField,RadioField #importação dos campos dos formulários
 from wtforms.validators import DataRequired, Email, EqualTo, Length, ValidationError #importação de funções que validam as informações inseridas 
 #pelo usuário
-from projeto.models import Clientes
+
 
 #criação de formulários
 class FormLogin(FlaskForm):
@@ -21,19 +21,6 @@ class FormCriarConta(FlaskForm):
     botao_confirmacao=SubmitField("Criar conta")
  
  #investigar repetição de email
-
-    def validadate_telefone(self,telefone):
-        usuario = Clientes.query.filter_by(telefone=telefone.data).first()
-        if usuario: raise ValidationError("Telefone cadastrado!")
- 
-    def validate_email(self,email):
-        usuario= Clientes.query.filter_by(email=email.data).first()
-        if usuario: raise ValidationError("Email já cadastrado, faça login")
-    
-    def validate_cpf(self,CPF):
-        usuario=Clientes.query.filter_by(CPF=CPF.data).first()
-        if usuario: raise ValidationError("CPF já cadastrado, faça login")
-    #função que define se um usuário ja existe, usando CPF,telefone ou email como parâmetro
 
 class FormContato(FlaskForm):
     descricao=StringField("Descrição do chamado",validators=[DataRequired()])

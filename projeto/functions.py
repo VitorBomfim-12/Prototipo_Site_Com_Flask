@@ -1,23 +1,19 @@
 from projeto import mail
 from flask_mail import Message
-from projeto.models import Chamado
+
 from datetime import date,datetime
 import random,os,dotenv
 import pymysql, pymysql.cursors
-from projeto import login_manager
-from flask_login import UserMixin
+
 
 dotenv.load_dotenv()
 def gera_n(lim):
-     while True:
-         n_chamado=""
-         for i in range (lim):
-             n_chamado+=str(random.randint(0,9))
+        n=""
+        for i in range (lim):
+             n+=str(random.randint(0,9))
+        return n
 
-         teste_chamado_exis= Chamado.query.filter_by(numerochamado=n_chamado).first()
-         if not teste_chamado_exis:
-             return str(n_chamado)
-         
+ 
 def email_verifica(n_cham,email):
     
     msg_ve = Message(subject=f" Código de verificação ", sender = os.getenv('DEL_EMAIL'), recipients=[email])
@@ -47,7 +43,7 @@ def get_db_connection():
         host='localhost',
         user='root',
         password=os.getenv("DB_password"),
-        database='helpdesk',
+        database='helpdesk_db',
         cursorclass=pymysql.cursors.DictCursor
     )
     return connection
