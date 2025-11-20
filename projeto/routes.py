@@ -27,7 +27,7 @@ def homepage():
                     cod=gera_n(6)
                     hash_cod = bcrypt.generate_password_hash(cod).decode('utf-8')
                     cur.execute(""" insert into codigosmfa (cod_hash,user_id) VALUES (%s,%s)""",(hash_cod,usuario['id']))
-                
+                    con.commit()
                     email_verifica(cod,formlogin.email.data)
                     
                 
@@ -66,13 +66,13 @@ def verificacao():
         if formverifica.validate_on_submit():
             try:    
                 with con.cursor(pymysql.cursors.DictCursor) as cur:
-                        cur.execute("SELECT * FROM codigosmfa WHERE user_id = %s",user)
+                        cur.execute("SELECT * FROM codigosmfa WHERE user_id = %s",(user))
                         tentativa_acess= cur.fetchall()
-                        hora_envio_cod = tentativa_acess['hora_cod']
+                        
             
                
                 hora_atual=datetime.utcnow()
-                diferença = hora_atual - hora_envio_cod
+                diferença = hora_atual - tentativa_acess['hora_cod']
                 limite = timedelta(minutes=10)
 
                 if bcrypt.check_password_hash(tentativa_acess['cod_hash'] , formverifica.codigo_verificacao.data) and diferença<limite:
@@ -99,7 +99,7 @@ def verificacao():
                     session.clear()
                     flash("Código incorreto!")
                     with con.cursor(pymysql.cursors.DictCursor) as cur:
-                        cur.execute("delete * FROM codigosmfa WHERE user_id = %s",user)
+                        cur.execute("delete * FROM codigosmfa WHERE user_id = %s",(user))
                         con.commit()
                     return redirect(url_for("homepage"))
             finally:
@@ -131,7 +131,7 @@ def criarconta():
                     return redirect(url_for("criarconta"))
                 
                 with con.cursor(pymysql.cursors.DictCursor) as cur:
-                    cur.execute ("SELECT * FROM users where email = %s",email_digitado)
+                    cur.execute ("SELECT * FROM users where email = %s",(email_digitado))
                     usuario = cur.fetchone()
 
                 if not usuario:
