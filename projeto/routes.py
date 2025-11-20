@@ -25,8 +25,9 @@ def homepage():
                 if usuario and  bcrypt.check_password_hash(usuario['password_user'], formlogin.senha.data):
                     session["user_attempt"] = usuario['id']
                     cod=gera_n(6)
+                    now_utc=datetime.utcnow()
                     hash_cod = bcrypt.generate_password_hash(cod).decode('utf-8')
-                    cur.execute(""" insert into codigosmfa (cod_hash,user_id) VALUES (%s,%s)""",(hash_cod,usuario['id']))
+                    cur.execute(""" insert into codigosmfa (cod_hash,user_id,hora_cod) VALUES (%s,%s,%s)""",(hash_cod,usuario['id'],now_utc))
                     con.commit()
                     email_verifica(cod,formlogin.email.data)
                     
@@ -66,21 +67,21 @@ def verificacao():
         if formverifica.validate_on_submit():
             try:    
                 with con.cursor(pymysql.cursors.DictCursor) as cur:
-                        cur.execute("SELECT * FROM codigosmfa WHERE user_id = %s",(user))
-                        tentativa_acess= cur.fetchall()
+                        cur.execute("SELECT * FROM codigosmfa WHERE user_id = %s",(user,))
+                        tentativa_acess= cur.fetchone()
                         
-            
-               
                 hora_atual=datetime.utcnow()
                 diferença = hora_atual - tentativa_acess['hora_cod']
                 limite = timedelta(minutes=10)
-
-                if bcrypt.check_password_hash(tentativa_acess['cod_hash'] , formverifica.codigo_verificacao.data) and diferença<limite:
+                print(f"--TESTE PARA DESENVOLVEDOR--\n"
+                      f"{tentativa_acess['hora_cod']}\n"
+                      f"{hora_atual}")
+                if bcrypt.check_password_hash(tentativa_acess['cod_hash'],formverifica.codigo_verificacao.data) and diferença<limite:
 
                     session.pop('user_attempt')
                     session['user'] = tentativa_acess['user_id']
                     with con.cursor(pymysql.cursors.DictCursor) as cur:
-                        cur.execute("DELETE * FROM codigosmfa WHERE user_id = %s",(user))
+                        cur.execute("DELETE FROM codigosmfa WHERE user_id = %s",(user))
                         con.commit()
                     return redirect (url_for("suporte"))
                 
@@ -89,7 +90,7 @@ def verificacao():
                     session.clear()
                     flash("Código expirado")
                     with con.cursor(pymysql.cursors.DictCursor) as cur:
-                        cur.execute("DELETE* FROM codigosmfa WHERE user_id = %s",(user))
+                        cur.execute("DELETE FROM codigosmfa WHERE user_id = %s",(user))
                         con.commit()
                     
                     return redirect(url_for("homepage"))
@@ -99,7 +100,7 @@ def verificacao():
                     session.clear()
                     flash("Código incorreto!")
                     with con.cursor(pymysql.cursors.DictCursor) as cur:
-                        cur.execute("delete * FROM codigosmfa WHERE user_id = %s",(user))
+                        cur.execute("DELETE FROM codigosmfa WHERE user_id = %s",(user))
                         con.commit()
                     return redirect(url_for("homepage"))
             finally:
