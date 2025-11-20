@@ -151,7 +151,9 @@ def criarconta():
 
 @app.route("/suporte", methods=["GET","POST"])
 def suporte():
-    if ''
+    if 'user_id' not in session:
+        return redirect(url_for("homepage"))
+    
     form_chamado = FormContato()
     if form_chamado.validate_on_submit():
          
