@@ -51,6 +51,60 @@ def homepage():
             
     return render_template ("homepage.html", form=formlogin)
 
+
+
+@app.route("/verifica", methods =["GET","POST"])
+def verificacao():
+    
+    formverifica=Form_Verifica()
+    user = session.get('user_attempt')
+    
+    con = get_db_connection()
+    with con.cursor(pymysql.cursors.DictCursor) as cur:
+        cur.execute("SELECT * FROM codigosmfa WHERE user_id = %s",user)
+        tentativa_acess= cur.fetchone()
+
+
+
+    hora_envio_cod = tentativa_acess['hora_cod']
+    hora_atual=datetime.utcnow()
+    diferença = hora_atual - hora_envio_cod
+    limite = timedelta(minutes=10)
+    
+    if formverifica.validate_on_submit():
+     
+     if con:
+        
+        if bcrypt.check_password_hash(tentativa_acess['cod_hash'] , formverifica.codigo_verificacao.data) and diferença<limite:
+
+            session.pop('user_attempt')
+            session['user'] = tentativa_acess['user_id']
+            with con.cursor(pymysql.cursors.DictCursor) as cur:
+                cur.execute("delete * FROM codigosmfa WHERE user_id = %s",user)
+                con.commit()
+            return redirect (url_for("suporte"))
+        
+        elif diferença > limite: 
+
+            session.clear()
+            flash("Código expirado")
+            with con.cursor(pymysql.cursors.DictCursor) as cur:
+                cur.execute("delete * FROM codigosmfa WHERE user_id = %s",user)
+                con.commit()
+            
+            return redirect(url_for("homepage"))
+        
+        elif formverifica.codigo_verificacao.data!=tentativa_acess.cod_hash:
+
+            session.clear()
+            flash("Código incorreto!")
+            with con.cursor(pymysql.cursors.DictCursor) as cur:
+                cur.execute("delete * FROM codigosmfa WHERE user_id = %s",user)
+                con.commit()
+            return redirect(url_for("homepage"))
+        
+    return render_template("verifica.html", form = formverifica)
+   
       
 @app.route("/criarconta", methods =["GET","POST"])
 def criarconta():
@@ -96,8 +150,8 @@ def criarconta():
     return render_template("criarconta.html", form = formcriarconta)
 
 @app.route("/suporte", methods=["GET","POST"])
-@login_required
 def suporte():
+    if ''
     form_chamado = FormContato()
     if form_chamado.validate_on_submit():
          
@@ -113,10 +167,8 @@ def suporte():
           serialnumber= form_chamado.serial_number.data,
           equipamento_id= form_chamado.equipamento.data
           ,cliente_id=current_user.id )
-         
-         database.session.add(chamado)
-         database.session.commit()
-   
+     
+
          suporte_email(n_chamado,current_user.clientname,
                        form_chamado.serial_number.data,
                        form_chamado.descricao.data,data,
