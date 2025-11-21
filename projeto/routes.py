@@ -2,7 +2,7 @@ from flask import Flask,render_template,url_for,redirect,flash,session
 from projeto import app,bcrypt
 import dotenv
 from datetime import timedelta,datetime
-from flask_login import login_required, login_user,logout_user,current_user
+from flask_login import logout_user,current_user
 from projeto.forms import FormCriarConta, FormLogin, FormContato, Form_Verifica
 from projeto.functions import data_,email_verifica,gera_n,hora_,suporte_email,get_db_connection
 from dotenv import load_dotenv
@@ -192,7 +192,7 @@ def suporte():
                     return redirect(url_for("suporte"))
             finally:
                 con.close()
-                cur.close()
+                
     else:
         flash("Erro ao conectar ao banco!")
                 
